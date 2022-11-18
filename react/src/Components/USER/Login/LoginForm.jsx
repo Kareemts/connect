@@ -11,16 +11,12 @@ import Container from '@mui/material/Container';
 import { Alert, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useState } from 'react';
 import axios from 'axios';
-import { useEffect } from 'react';
-
 const theme = createTheme();
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPssword] = useState('');
-
   const [signInErr, setSignInErr] = useState(false);
-
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
@@ -33,13 +29,13 @@ const LoginForm = () => {
       })
       .then((result) => {
         console.table(result.data);
-        if (result.data.userLogin) {
-          navigate('/Home');
+        if (result.data.userLogin === true) {
           localStorage.setItem('token', result.data.token);
           localStorage.setItem(
             'userData',
             JSON.stringify({ login: true, user: result.data.userDetails })
           );
+          setTimeout(()=>{navigate('/home')},5000);
         } else {
           setSignInErr(true);
         }
@@ -48,13 +44,6 @@ const LoginForm = () => {
         alert(err.message);
       });
   };
-
-  // const token = JSON.parse(localStorage.getItem('userData'));
-  // console.log(token.login);
-
-  useEffect(() => {
-    console.log('aaaaa')
-  },[] );
 
   return (
     <ThemeProvider theme={theme}>
@@ -166,7 +155,7 @@ const LoginForm = () => {
             </Grid>
           </Box>
         </Box>
-        <Box component="main" display={'flex'} justifyContent='center' m mb={3} >
+        <Box component="main" display={'flex'} justifyContent="center" m mb={3}>
           <span style={{ margin: '5px' }}>
             Don't have an account?{' '}
             <span

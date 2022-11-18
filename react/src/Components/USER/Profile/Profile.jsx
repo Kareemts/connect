@@ -60,14 +60,11 @@ const Profile = () => {
 
   // take user id from localStorage
   const userData = JSON.parse(localStorage.getItem('userData'));
-  const useId = userData.user.id;
+  const userId = userData.user.id;
   const timeStamp = new Date();
+  const hours = timeStamp.getHours() % 12 || 12;
   const time =
-    timeStamp.getHours() +
-    ':' +
-    timeStamp.getMinutes() +
-    ', ' +
-    timeStamp.toDateString();
+    hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
 
   //function for upload a post
   const submit = (e) => {
@@ -79,7 +76,7 @@ const Profile = () => {
       .post('/uploadPost', data, {
         params: {
           postCaption,
-          useId,
+          userId,
           timeStamp,
           time,
         },
@@ -340,14 +337,18 @@ const Profile = () => {
             justifyContent={'space-between'}
           >
             <Typography variant="h6">Share New Post</Typography>
-            <Box
-              sx={{
-                cursor: 'pointer',
-                '&:hover': { color: 'black', transform: 's' },
-              }}
-              color={'#199FF7'}
-            >
-              <CloseIcon onClick={() => setPost(false)} />
+            <Box>
+              <CloseIcon
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': {
+                    color: '#199FF7',
+                    transform: 'translate(3)',
+                    scale: '1.2',
+                  },
+                }}
+                onClick={() => setPost(false)}
+              />
             </Box>
           </Box>
           <Divider />

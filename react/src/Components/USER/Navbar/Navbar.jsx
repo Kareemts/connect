@@ -50,29 +50,69 @@ const Navbar = () => {
         </Search>
         <Icones>
           <HomeIcon
-            sx={{ color: 'black', cursor: 'pointer' }}
+            sx={{
+              color: 'black',
+              cursor: 'pointer',
+              '&:hover': {
+                color: '#199FF7',
+                transform: 'translate(3)',
+                scale: '1.2',
+              },
+            }}
             onClick={() => navigate('/Home')}
           />
           <Badge badgeContent={4} color="error">
             <QuestionAnswerIcon
-              style={{ color: 'black', cursor: 'pointer' }}
+              sx={{
+                color: 'black',
+                cursor: 'pointer',
+                '&:hover': {
+                  color: '#199FF7',
+                  transform: 'translate(3)',
+                  scale: '1.2',
+                },
+              }}
               onClick={() => navigate('/Chat')}
             />
           </Badge>
           <Badge badgeContent={4} color="error">
             <NotificationsActiveIcon
-              sx={{ color: 'black', cursor: 'pointer' }}
+              sx={{
+                color: 'black',
+                cursor: 'pointer',
+                '&:hover': {
+                  color: '#199FF7',
+                  transform: 'translate(3)',
+                  scale: '1.2',
+                },
+              }}
               onClick={() => navigate('/Notification')}
             />
           </Badge>
           <PersonIcon
-            sx={{ color: 'black', cursor: 'pointer' }}
+            sx={{
+              color: 'black',
+              cursor: 'pointer',
+              '&:hover': {
+                color: '#199FF7',
+                transform: 'translate(3)',
+                scale: '1.2',
+              },
+            }}
             onClick={() => navigate('/Profile')}
           />
         </Icones>
         <UserBozx onClick={(e) => setOpen(true)}>
           <PersonIcon
-            sx={{ color: 'black', cursor: 'pointer' }}
+            sx={{
+              color: 'black',
+              cursor: 'pointer',
+              '&:hover': {
+                color: '#199FF7',
+                transform: 'translate(3)',
+                scale: '1.2',
+              },
+            }}
             onClick={() => navigate('/Profile')}
           />
         </UserBozx>

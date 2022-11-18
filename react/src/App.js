@@ -7,7 +7,7 @@ import ViewSignup from './Pages/USER/ViewSignup';
 import ViewLogin from './Pages/USER/ViewLogin';
 import ViewChat from './Pages/USER/ViewChat';
 import { Box } from '@mui/material';
-// import PriverRouter from './PriverRouter';
+import PrivetRouter from './PrivetRouter';
 
 function App() {
   return (
@@ -16,12 +16,12 @@ function App() {
         <Routes>
           <Route path="/" element={<ViewLogin />} />
           <Route path="/Sign-Up" element={<ViewSignup />} />
-          {/* <Route element={<PriverRouter />}> */}
-            <Route path="/Home" element={<ViewHomePage />} />
+          <Route element={<PrivetRouter />}>
+            <Route path="/home" element={<ViewHomePage />} />
             <Route path="/Profile" element={<ViewProfile />} />
             <Route path="/Notification" element={<ViewNotification />} />
             <Route path="/Chat" element={<ViewChat />} />
-          {/* </Route> */}
+          </Route>
         </Routes>
       </BrowserRouter>
     </Box>

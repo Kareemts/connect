@@ -1,5 +1,4 @@
 import { Box, Stack } from '@mui/system';
-import React from 'react';
 import Feed from '../../Components/USER/HomePage/Feed/Feed';
 import LeftBar from '../../Components/USER/HomePage/LeftBar/LeftBar';
 import RightBar from '../../Components/USER/HomePage/RightBar/RightBar';
@@ -20,7 +19,8 @@ const ViewHomePage = () => {
         <LeftBar />
         <Feed />
         <RightBar />
-      </Stack >
+      </Stack>
+
       <ViewNavbarMobile />
     </Box>
   );

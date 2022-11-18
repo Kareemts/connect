@@ -8,21 +8,29 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import axios from 'axios';
 import React, { useEffect } from 'react';
 import { useState } from 'react';
+import { axiosUrl } from '../../../../axios/axiosInstance';
 
+//date generation
+const timeStamp = new Date();
+const hours = timeStamp.getHours() % 12 || 12;
+const date =
+  hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
+
+//taking userId from browserStorage
 const userData = JSON.parse(localStorage.getItem('userData'));
-const useId = userData.user.id;
+const userId = userData?.user.id;
 
 const RightBar = () => {
   const [suggestions, setSuggestions] = useState(null);
+  const [connection, setConnection] = useState(false);
 
   useEffect(() => {
-    axios
+    axiosUrl
       .get('/suggestions', {
         params: {
-          useId,
+          userId,
         },
       })
       .then((result) => {
@@ -33,6 +41,21 @@ const RightBar = () => {
       });
     return () => {};
   }, []);
+
+  const connect = (connectedId) => {
+    axiosUrl
+      .post('/connect', {
+        connectedId,
+        userId,
+        date,
+        timeStamp,
+      })
+      .then((result) => {
+        console.log(result);
+        setConnection(true);
+      })
+      .catch((err) => {});
+  };
 
   return (
     <Box flex="2" p="3" m={5} sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -81,9 +104,33 @@ const RightBar = () => {
                         {user.firstName + ' ' + user.lastName}
                       </Typography>
                     </Box>
-                    <Button sx={{ borderRadius: '10px', fontSize: '10px' }}>
-                      Connect
-                    </Button>
+                    {connection ? (
+                      <Button
+                        sx={{
+                          borderRadius: '10px',
+                          fontSize: '10px',
+                          color: 'black',
+                        }}
+                      >
+                        Connected
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        sx={{
+                          borderRadius: '10px',
+                          fontSize: '10px',
+                          '&:hover': {
+                            color: 'black',
+                            transform: 'translate(1)',
+                            scale: '1.2',
+                          },
+                        }}
+                        onClick={() => connect(user._id)}
+                      >
+                        Connect
+                      </Button>
+                    )}
                   </Box>
                 </Box>
               );
