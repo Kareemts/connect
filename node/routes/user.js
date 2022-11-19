@@ -28,7 +28,7 @@ router.post('/uploadPost', imageUpload);
 
 /* router for  getPost */
 
-router.get('/getPostes',verifyToken, getPostes);
+router.get('/getPostes', getPostes);
 
 /* router for getting suggestions in home page */
 

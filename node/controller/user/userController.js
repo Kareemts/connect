@@ -186,7 +186,6 @@ const suggestions = (req, res) => {
 };
 
 const connect = async (req, res) => {
-  console.log(req.body);
   const connectionData = {
     followerId: req.body.userId,
     time: req.body.date,
@@ -225,7 +224,6 @@ const connect = async (req, res) => {
 };
 
 const likePost = async (req, res) => {
-
   const likedData = {
     likedUserId: req.body.userId,
     timeStamp: req.body.timeStamp,
@@ -234,18 +232,17 @@ const likePost = async (req, res) => {
   const liked = await schema.Post_data.findByIdAndUpdate(
     req.body.postId,
     {
-      $push: { likes:  req.body.userId },
+      $push: { likes: req.body.userId },
     },
     {
       new: true,
     }
   );
-  console.log(liked);
+
   res.status(200).json(liked);
 };
 
 const unlikePost = async (req, res) => {
-  
   const likedData = {
     likedUserId: req.body.userId,
     timeStamp: req.body.timeStamp,
@@ -254,7 +251,7 @@ const unlikePost = async (req, res) => {
   const liked = await schema.Post_data.findByIdAndUpdate(
     req.body.postId,
     {
-      $pull: { likes:  req.body.userId },
+      $pull: { likes: req.body.userId },
     },
     {
       new: true,

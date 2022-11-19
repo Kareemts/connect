@@ -8,30 +8,31 @@ import {
   Typography,
 } from '@mui/material';
 import React, { useEffect, useState } from 'react';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import FavoriteIcon from '@mui/icons-material/Favorite';
+// import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+// import FavoriteIcon from '@mui/icons-material/Favorite';
 import SendIcon from '@mui/icons-material/Send';
 import CommentIcon from '@mui/icons-material/Comment';
 import { Box } from '@mui/system';
 import { axiosUrl } from '../../../../axios/axiosInstance';
 import { useNavigate } from 'react-router-dom';
-
-//date generation
-const timeStamp = new Date();
-const hours = timeStamp.getHours() % 12 || 12;
-const date =
-  hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
-
-//taking userId from browserStorage
-const userData = JSON.parse(localStorage.getItem('userData'));
-const userId = userData?.user.id;
+import LIke from './LIke';
+import Comment from './Comment';
 
 const Post = () => {
   const navigate = useNavigate();
+
+  //for take the all postfrom the server
   const [getPostes, setGetPostes] = useState(null);
+
+  //if there is no post the active this state
   const [noPost, setNoPost] = useState(false);
-  const [like, setLike] = useState(null);
-  const [unlike, setUnlike] = useState(null);
+
+  //for updating the component afrer like the post
+  const [liked, setLiked] = useState('');
+
+  //for opening comment box
+  const [open, setOpen] = useState(false);
+
   useEffect(() => {
     axiosUrl
       .get('/getPostes')
@@ -45,47 +46,13 @@ const Post = () => {
         } else {
           setTimeout(() => setGetPostes(result.data), 200);
         }
-        console.log(result.data);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        alert(err.message);
+      });
     return () => {};
-  }, [navigate, like,unlike]);
+  }, [navigate, liked]);
 
-  //for likeing post
-  
-  const likePost = (postId) => {
-    axiosUrl
-      .put('/likePost', {
-        postId,
-        userId,
-        date,
-        timeStamp,
-      })
-      .then((result) => {
-        setLike(result.data);
-        console.log('likedDAta', result.data);
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
-  };
-
-  //for unlikeing post
-
-  const unlikePost = (postId) => {
-    axiosUrl
-      .put('/unlikePost', {
-        postId,
-        userId,
-      })
-      .then((result) => {
-        setUnlike(result.data);
-        console.log('likedDAta', result.data);
-      })
-      .catch((err) => {
-        alert(err.message);
-      });
-  };
 
   return (
     <Box>
@@ -228,42 +195,12 @@ const Post = () => {
                       sx={{ display: 'flex' }}
                       justifyContent="space-between"
                     >
-                      {post.likes.includes(userId) ? (
-                        <Box
-                          m
-                          component={'span'}
-                          onClick={() => unlikePost(post._id)}
-                        >
-                          <FavoriteIcon
-                            sx={{
-                              color: 'red',
-                              cursor: 'pointer',
-                              '&:hover': {
-                                color: 'red',
-                                scale: '1.2',
-                              },
-                            }}
-                          />
-                        </Box>
-                      ) : (
-                        <Box
-                          m
-                          component={'span'}
-                          onClick={() => likePost(post._id)}
-                        >
-                          <FavoriteBorderIcon
-                            sx={{
-                              cursor: 'pointer',
-                              '&:hover': {
-                                color: '#199FF7',
-                                scale: '1.2',
-                              },
-                            }}
-                          />
-                        </Box>
-                      )}
-
                       <Box m>
+                        <LIke post={post} setLiked={setLiked} />
+                      </Box>
+
+                      <Box m component={'div'} onClick={() => setOpen(true)}>
+                        <Comment open={open} setOpen={setOpen} />
                         <CommentIcon
                           sx={{
                             cursor: 'pointer',

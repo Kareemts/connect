@@ -45,6 +45,8 @@ const Profile = () => {
   // state for post emtyImage
   const [emtyImage, setEmtyImage] = useState(false);
 
+  
+
   // function for choose image
   const preview = (e) => {
     setImage(e.target.files[0]);
