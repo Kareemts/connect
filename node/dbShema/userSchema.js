@@ -13,6 +13,7 @@ const User_Schema = new mongoose.Schema({
   password: String,
   time: String,
   timeStamp: Date,
+  profileImage: String,
   connections: [
     {
       connctionId: ObjectId,
@@ -29,7 +30,8 @@ const User_Schema = new mongoose.Schema({
   ],
   notifications: [
     {
-      followerId: ObjectId,
+      userId: ObjectId,
+      condentId: ObjectId,
       message: String,
       time: String,
       timeStamp: Date,
@@ -55,6 +57,7 @@ const Post_Schema = new mongoose.Schema({
   time: String,
   timeStamp: Date,
   report: Boolean,
+  userProfileImage: String,
   userId: { type: ObjectId, ref: 'users' },
   reportPost: [
     {
@@ -65,10 +68,12 @@ const Post_Schema = new mongoose.Schema({
   ],
   comments: [
     {
-      CommentedUserId: String,
+      commentedUserId: String,
       comment: String,
       time: String,
       timeStamp: Date,
+      commentedUserImage: String,
+      commentedUserName: String,
     },
   ],
   likes: [{ type: ObjectId }],

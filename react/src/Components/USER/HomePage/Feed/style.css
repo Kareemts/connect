@@ -1,0 +1,19 @@
+.collapse {
+  max-height: 200px;
+  overflow-y: scroll;
+  overflow-y: hidden; /* Hide vertical scrollbar */
+}
+.collapse::-webkit-scrollbar {
+  display: none;
+}
+
+.collapse {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.textField {
+  display: inline-block;
+  border: solid 1px black;
+  min-width: '50px';
+  max-width: '200px';
+}

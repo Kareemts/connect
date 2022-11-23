@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Card,
@@ -11,12 +10,7 @@ import {
 import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { axiosUrl } from '../../../../axios/axiosInstance';
-
-//date generation
-const timeStamp = new Date();
-const hours = timeStamp.getHours() % 12 || 12;
-const date =
-  hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
+import Suggetions from './Suggetions';
 
 //taking userId from browserStorage
 const userData = JSON.parse(localStorage.getItem('userData'));
@@ -24,7 +18,6 @@ const userId = userData?.user.id;
 
 const RightBar = () => {
   const [suggestions, setSuggestions] = useState(null);
-  const [connection, setConnection] = useState(false);
 
   useEffect(() => {
     axiosUrl
@@ -41,21 +34,6 @@ const RightBar = () => {
       });
     return () => {};
   }, []);
-
-  const connect = (connectedId) => {
-    axiosUrl
-      .post('/connect', {
-        connectedId,
-        userId,
-        date,
-        timeStamp,
-      })
-      .then((result) => {
-        console.log(result);
-        setConnection(true);
-      })
-      .catch((err) => {});
-  };
 
   return (
     <Box flex="2" p="3" m={5} sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -78,62 +56,7 @@ const RightBar = () => {
           <Divider />
           {suggestions ? (
             suggestions.map((user) => {
-              return (
-                <Box
-                  m
-                  sx={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignContent: 'space-around',
-                  }}
-                  key={user._id}
-                >
-                  <Box
-                    m
-                    display={'flex'}
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Box
-                      display={'flex'}
-                      justifyContent="center"
-                      alignItems="center"
-                    >
-                      <Avatar alt="Remy Sharp" src="" />
-                      <Typography m>
-                        {user.firstName + ' ' + user.lastName}
-                      </Typography>
-                    </Box>
-                    {connection ? (
-                      <Button
-                        sx={{
-                          borderRadius: '10px',
-                          fontSize: '10px',
-                          color: 'black',
-                        }}
-                      >
-                        Connected
-                      </Button>
-                    ) : (
-                      <Button
-                        variant="contained"
-                        sx={{
-                          borderRadius: '10px',
-                          fontSize: '10px',
-                          '&:hover': {
-                            color: 'black',
-                            transform: 'translate(1)',
-                            scale: '1.2',
-                          },
-                        }}
-                        onClick={() => connect(user._id)}
-                      >
-                        Connect
-                      </Button>
-                    )}
-                  </Box>
-                </Box>
-              );
+              return <Suggetions key={user._id} user={user} />;
             })
           ) : (
             <Stack spacing={1}>

@@ -10,9 +10,11 @@ const {
   connect,
   likePost,
   unlikePost,
+  addComment,
+  profile,
+  addProfilePic,
 } = require('../controller/user/userController');
 const { verifyToken } = require('../middleware/middleware');
-
 
 /* router for signUp */
 
@@ -32,7 +34,7 @@ router.get('/getPostes', getPostes);
 
 /* router for getting suggestions in home page */
 
-router.get('/suggestions', suggestions)
+router.get('/suggestions', suggestions);
 
 /**router for otp varification */
 
@@ -49,5 +51,17 @@ router.put('/likePost', likePost);
 /**router for connect people */
 
 router.put('/unlikePost', unlikePost);
+
+/**router for adding comment */
+
+router.put('/addComment', addComment);
+
+/**router for  profile */
+
+router.get('/profile', profile);
+
+/**router for adding profilePic */
+
+router.post('/addProfilePic', addProfilePic);
 
 module.exports = router;

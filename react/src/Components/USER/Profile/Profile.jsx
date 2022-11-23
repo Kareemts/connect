@@ -6,19 +6,24 @@ import {
   CardMedia,
   Divider,
   Grid,
+  IconButton,
   Modal,
   styled,
   TextField,
   Typography,
+  Avatar,
 } from '@mui/material';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AddBoxIcon from '@mui/icons-material/AddBox';
 import CloseIcon from '@mui/icons-material/Close';
 import Followers from './Followers/Followers';
 import Connections from './Connections/Connections';
 import CollectionsIcon from '@mui/icons-material/Collections';
+import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import axios from 'axios';
+import PorofilePic from './PorofilePic';
+import { axiosUrl } from '../../../axios/axiosInstance';
 
 //modal style
 const StyledModal = styled(Modal)({
@@ -28,10 +33,20 @@ const StyledModal = styled(Modal)({
 });
 
 const Profile = () => {
-  // state for modal
+  // take user id from localStorage
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const userId = userData?.user.id;
+  const userProfileImage = userData?.user.profileImage;
+  const timeStamp = new Date();
+  const hours = timeStamp.getHours() % 12 || 12;
+  const time =
+    hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
+
+  // state for modals
   const [followers, setFollowers] = useState(false);
   const [connections, setConnections] = useState(false);
   const [post, setPost] = useState(false);
+  const [openProfilePic, setOpenProfilePic] = useState(false);
 
   // state for image upload
   const [postImages, setPostImages] = useState({ file: [] });
@@ -45,7 +60,14 @@ const Profile = () => {
   // state for post emtyImage
   const [emtyImage, setEmtyImage] = useState(false);
 
-  
+  //state for user uploaded posts
+  const [Posts, setPosts] = useState([]);
+
+  //state for user profie details
+  const [profileData, setProfileData] = useState(null);
+
+  //state for user profie details
+  const [noPost, setNopost] = useState(false);
 
   // function for choose image
   const preview = (e) => {
@@ -60,14 +82,6 @@ const Profile = () => {
     uploadPost(e);
   };
 
-  // take user id from localStorage
-  const userData = JSON.parse(localStorage.getItem('userData'));
-  const userId = userData.user.id;
-  const timeStamp = new Date();
-  const hours = timeStamp.getHours() % 12 || 12;
-  const time =
-    hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
-
   //function for upload a post
   const submit = (e) => {
     e.preventDefault();
@@ -81,10 +95,10 @@ const Profile = () => {
           userId,
           timeStamp,
           time,
+          userProfileImage,
         },
       })
       .then((result) => {
-        console.log('aaaaaaaaa', result.data);
         if (result.data.noImage) {
           setEmtyImage(true);
         } else {
@@ -98,6 +112,29 @@ const Profile = () => {
         alert(err.message);
       });
   };
+
+  useEffect(() => {
+    axiosUrl
+      .get('/profile', {
+        params: {
+          userId,
+        },
+      })
+      .then((result) => {
+        console.log(result);
+        setProfileData(result.data.userData);
+        if (result.data.post >= 0) {
+          setNopost(true);
+        }
+        setPosts(result.data.post.reverse());
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
+    return () => {};
+  }, [openProfilePic, post, userId]);
+
+  console.log('Posts', profileData);
 
   return (
     <Box
@@ -117,19 +154,59 @@ const Profile = () => {
         p={2}
       >
         <Box
-          borderRadius={50}
-          mb
-          bgcolor="blue"
-          sx={{
-            width: { xs: '4rem', sm: '5rem', md: '10rem' },
-            height: { xs: '4rem', sm: '5rem', md: '10rem' },
-            marginRight: { xs: '0rem', sm: '1rem', md: '6rem' },
-          }}
-        />
+          component={'div'}
+          display={'flex'}
+          flexDirection={'column'}
+          justifyContent="center"
+          alignItems={'center'}
+          sx={{ marginRight: { xs: '0rem', sm: '1rem', md: '6rem' } }}
+        >
+          {profileData?.profileImage === '' ? (
+            <Avatar
+              sx={{
+                bgcolor: 'blue',
+                margin: 2,
+                width: { xs: '4rem', sm: '5rem', md: '10rem' },
+                height: { xs: '4rem', sm: '5rem', md: '10rem' },
+                fontSize: { xs: '4rem', sm: '5rem', md: '10rem' },
+              }}
+              aria-label="recipe"
+            ></Avatar>
+          ) : (
+            <CardMedia
+              component="img"
+              sx={{
+                borderRadius: 100,
+                width: { xs: '4rem', sm: '5rem', md: '10rem' },
+                height: { xs: '4rem', sm: '5rem', md: '10rem' },
+              }}
+              src={`/images/profileImages/${profileData?.profileImage}`}
+              alt="green iguana"
+            />
+          )}
+
+          <Box component={'div'} onClick={() => setOpenProfilePic(true)}>
+            <IconButton
+              color="primary"
+              aria-label="upload picture"
+              component="label"
+            >
+              {/* <input hidden accept="image/*" type="file" /> */}
+              <Typography
+                component={'h6'}
+                sx={{ fontSize: { xs: 10, sm: 15 } }}
+              >
+                Change
+              </Typography>
+              <PhotoCamera sx={{ fontSize: { xs: 13, sm: 20 }, margin: 1 }} />
+            </IconButton>
+          </Box>
+        </Box>
+
         <Box m={1}>
           <Box display={'flex'} alignItems={'center'}>
             <Typography m sx={{ fontSize: { xs: '1rem', sm: '2rem' } }}>
-              Name
+              {profileData?.firstName + ' ' + profileData?.lastName}
             </Typography>
             <SettingsIcon sx={{ cursor: 'pointer' }} />
           </Box>
@@ -142,7 +219,7 @@ const Profile = () => {
               <Typography
                 sx={{ fontSize: { xs: '1.5vh', sm: '3vh' }, cursor: 'pointer' }}
               >
-                <span style={{ fontWeight: 'bold' }}>10</span> Post
+                <span style={{ fontWeight: 'bold' }}>{Posts?.length}</span> Post
               </Typography>
             </Box>
             <Box m>
@@ -150,14 +227,20 @@ const Profile = () => {
                 onClick={() => setFollowers(true)}
                 sx={{ fontSize: { xs: '1.5vh', sm: '3vh' }, cursor: 'pointer' }}
               >
-                <span style={{ fontWeight: 'bold' }}>10</span> Followers
+                <span style={{ fontWeight: 'bold' }}>
+                  {profileData?.followers.length}
+                </span>{' '}
+                Followers
               </Typography>
             </Box>
             <Box m onClick={() => setConnections(true)}>
               <Typography
                 sx={{ fontSize: { xs: '1.5vh', sm: '3vh' }, cursor: 'pointer' }}
               >
-                <span style={{ fontWeight: 'bold' }}>10</span> Connections
+                <span style={{ fontWeight: 'bold' }}>
+                  {profileData?.connections.length}
+                </span>{' '}
+                Connections
               </Typography>
             </Box>
           </Box>
@@ -190,56 +273,51 @@ const Profile = () => {
           </Box>
         </Box>
         <Box>
+          {noPost ? (
+            <Box
+              m={10}
+              display={'flex'}
+              justifyContent={'center'}
+              fontSize={50}
+              fontWeight={'bolder'}
+            >
+              No Posts Availabile
+            </Box>
+          ) : (
+            ''
+          )}
           <Box sx={{ flexGrow: 1 }}>
             <Grid container>
-              <Grid display={'flex'} justifyContent="center" xs={4}>
-                <Card sx={{ maxWidth: 300, margin: '5px' }}>
-                  <CardActionArea>
-                    <CardMedia
-                      component="img"
-                      height="100%"
-                      src={`/images/potImages/1668057961836-63649646eefc0bb098098db5.png`}
-                      alt="green iguana"
-                    />
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              <Grid display={'flex'} justifyContent="center" xs={4}>
-                <Card sx={{ maxWidth: 300, margin: '5px' }}>
-                  <CardActionArea>
-                    <CardMedia
-                      component="img"
-                      height="100%"
-                      src={`/images/potImages/1668057961836-63649646eefc0bb098098db5.png`}
-                      alt="green iguana"
-                    />
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              <Grid display={'flex'} justifyContent="center" xs={4}>
-                <Card sx={{ maxWidth: 300, margin: '5px' }}>
-                  <CardActionArea>
-                    <CardMedia
-                      component="img"
-                      height="100%"
-                      src={`/images/potImages/1668057961836-63649646eefc0bb098098db5.png`}
-                      alt="green iguana"
-                    />
-                  </CardActionArea>
-                </Card>
-              </Grid>
-              <Grid display={'flex'} justifyContent="center" xs={4}>
-                <Card sx={{ maxWidth: 300, margin: '5px' }}>
-                  <CardActionArea>
-                    <CardMedia
-                      component="img"
-                      height="100%"
-                      src={`/images/potImages/1668057961836-63649646eefc0bb098098db5.png`}
-                      alt="green iguana"
-                    />
-                  </CardActionArea>
-                </Card>
-              </Grid>
+              {Posts.map((element) => {
+                return (
+                  <Grid display={'flex'} justifyContent="center" xs={4}>
+                    <Card sx={{ maxWidth: 300, margin: '5px' }}>
+                      <CardActionArea>
+                        <CardMedia
+                          component="img"
+                          sx={{
+                            borderRadius: 1,
+                            width: {
+                              xs: '6rem',
+                              sm: '10rem',
+                              md: '15rem',
+                              lg: '20rem',
+                            },
+                            height: {
+                              xs: '6rem',
+                              sm: '10rem',
+                              md: '15rem',
+                              lg: '20rem',
+                            },
+                          }}
+                          src={`/images/potImages/${element.imageName}`}
+                          alt="green iguana"
+                        />
+                      </CardActionArea>
+                    </Card>
+                  </Grid>
+                );
+              })}
             </Grid>
           </Box>
         </Box>
@@ -370,7 +448,7 @@ const Profile = () => {
                   width="200px"
                   height="200px"
                   style={{ borderRadius: 5 }}
-                  src={image ? URL.createObjectURL(image) : ''}
+                  src={image ? URL?.createObjectURL(image) : ''}
                 ></img>
               </Box>
             ) : (
@@ -423,6 +501,10 @@ const Profile = () => {
           </Box>
         </Box>
       </StyledModal>
+      <PorofilePic
+        openProfilePic={openProfilePic}
+        setOpenProfilePic={setOpenProfilePic}
+      />
     </Box>
   );
 };

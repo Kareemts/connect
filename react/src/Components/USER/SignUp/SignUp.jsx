@@ -72,6 +72,8 @@ const SignUp = () => {
   // state for signup data varification modal
   const [signUpData, setsignUpData] = useState(false);
 
+  // const [colse, setClose] = useState(true);
+
   const validateFistName = () => {
     if (firstName.length < 3 || '') {
       setfistNameValid(true);
@@ -297,7 +299,7 @@ const SignUp = () => {
           </Box>
         </Container>
       </ThemeProvider>
-      {OtpVerify ? <OtpVerification props={signUpData} /> : ''}
+      <OtpVerification props={signUpData} OtpVerify={OtpVerify} setOtpVerify={setOtpVerify} />
     </Box>
   );
 };

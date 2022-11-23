@@ -13,10 +13,9 @@ const StyledModal = styled(Modal)({
   transform: 'translate(3)',
 });
 
-const OtpVerification = ({ props }) => {
+const OtpVerification = ({ props, OtpVerify, setOtpVerify }) => {
   const [otpInValid, setOtpInValid] = useState(false);
   const [otpLength, setLength] = useState(false);
-  const [colse, setClose] = useState(true);
   const [otp, setOtp] = useState('');
   let navigate = useNavigate();
   console.log(props);
@@ -46,7 +45,7 @@ const OtpVerification = ({ props }) => {
 
   return (
     <Box>
-      <StyledModal open={true}>
+      <StyledModal open={OtpVerify} onClose={setOtpVerify}>
         <Box
           width={350}
           height={400}
@@ -69,7 +68,7 @@ const OtpVerification = ({ props }) => {
                   scale: '1.2',
                 },
               }}
-              onClick={() => setClose(false)}
+              onClick={() => setOtpVerify(false)}
             />
           </Box>
           <Box m>
@@ -89,7 +88,7 @@ const OtpVerification = ({ props }) => {
                 otpInValid ? (
                   <Box color={'red'}>incorrect otp</Box>
                 ) : '' || otpLength ? (
-                  <Box color={'red'}>OTP Must have 6 digit</Box>
+                  <Box color={'red'}>OTP Must have 6 digits</Box>
                 ) : (
                   ''
                 )

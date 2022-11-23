@@ -57,7 +57,6 @@ const otpVarification = (req, res) => {
       code: otp,
     })
     .then(async (resp) => {
-      console.log(resp);
       if (resp.valid) {
         console.log('valid');
         const data = req.body.props.data;
@@ -95,6 +94,7 @@ const signIN = async (req, res) => {
             userData.id = user._id;
             userData.email = user.email;
             userData.phone = user.phone;
+            userData.profileImage = user.profileImage;
             jwt = await authentication.jwtAthentication(userData);
             res.json({ userLogin: true, userDetails: userData, token: jwt });
           } else {
@@ -125,7 +125,7 @@ const imageUpload = (req, res) => {
     const storage = multer.diskStorage({
       destination: path.join(__dirname, '../../public/images', 'potImages'),
       filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + data.useId + '.png');
+        cb(null, Date.now() + '-' + data.userId + '.png');
       },
     });
 
@@ -182,83 +182,211 @@ const suggestions = (req, res) => {
         res.json(result);
       })
       .catch((err) => {});
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const connect = async (req, res) => {
-  const connectionData = {
-    followerId: req.body.userId,
-    time: req.body.date,
-    timeStamp: req.body.timeStamp,
-  };
-  //adding connnection
-  await schema.user_data.updateOne(
-    {
-      _id: req.body.connectedId,
-    },
-    {
-      $push: { followers: connectionData },
-    }
-  );
-  connectionData.connctionId = req.body.connectedId;
-  await schema.user_data.updateOne(
-    {
-      _id: req.body.userId,
-    },
-    {
-      $push: { connections: connectionData },
-    }
-  );
-  //send notification
-  connectionData.followerId = req.body.userId;
-  connectionData.message = 'You have new follower';
-  await schema.user_data.updateOne(
-    {
-      _id: req.body.connectedId,
-    },
-    {
-      $push: { notifications: connectionData },
-    }
-  );
-  res.status(200).json({ userConnecte: true });
+  try {
+    const connectionData = {
+      followerId: req.body.userId,
+      time: req.body.date,
+      timeStamp: req.body.timeStamp,
+    };
+
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.connectedId,
+      },
+      {
+        $push: { followers: connectionData },
+      }
+    );
+
+    connectionData.connctionId = req.body.connectedId;
+    
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.userId,
+      },
+      {
+        $push: { connections: connectionData },
+      }
+    );
+
+    connectionData.followerId = req.body.userId;
+    connectionData.message = 'You have new follower';
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.connectedId,
+      },
+      {
+        $push: { notifications: connectionData },
+      }
+    );
+    res.status(200).json({ userConnecte: true });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const likePost = async (req, res) => {
-  const likedData = {
-    likedUserId: req.body.userId,
-    timeStamp: req.body.timeStamp,
-    time: req.body.date,
-  };
-  const liked = await schema.Post_data.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $push: { likes: req.body.userId },
-    },
-    {
-      new: true,
-    }
-  );
+  try {
+    console.log(req.body);
+    const likedData = {
+      likedUserId: req.body.userId,
+      timeStamp: req.body.timeStamp,
+      time: req.body.date,
+    };
+    const liked = await schema.Post_data.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $push: { likes: req.body.userId },
+      },
+      {
+        new: true,
+      }
+    );
+    likedData.message = 'Liked your post';
+    likedData.userId = req.body.userId;
+    likedData.condentId = req.body.postId;
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.postedUserId,
+      },
+      {
+        $push: { notifications: likedData },
+      }
+    );
 
-  res.status(200).json(liked);
+    res.status(200).json(liked);
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const unlikePost = async (req, res) => {
-  const likedData = {
-    likedUserId: req.body.userId,
-    timeStamp: req.body.timeStamp,
-    time: req.body.date,
-  };
-  const liked = await schema.Post_data.findByIdAndUpdate(
-    req.body.postId,
-    {
-      $pull: { likes: req.body.userId },
-    },
-    {
-      new: true,
-    }
-  );
-  console.log(liked);
-  res.status(200).json(liked);
+  try {
+    const likedData = {
+      likedUserId: req.body.userId,
+      timeStamp: req.body.timeStamp,
+      time: req.body.date,
+    };
+    const uliked = await schema.Post_data.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $pull: { likes: req.body.userId },
+      },
+      {
+        new: true,
+      }
+    );
+
+    likedData.message = 'Liked your post';
+    likedData.userId = req.body.userId;
+    likedData.condentId = req.body.postId;
+
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.postedUserId,
+      },
+      {
+        $pull: { notifications: { userId: req.body.userId } },
+      }
+    );
+    res.status(200).json(uliked);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const addComment = async (req, res) => {
+  try {
+    const data = {
+      CommentedUserId: req.body.userId,
+      comment: req.body.comment,
+      time: req.body.date,
+      timeStamp: req.body.timeStamp,
+      commentedUserImage: req.body.profileImage,
+      commentedUserName: req.body.userName,
+    };
+    const comment = await schema.Post_data.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $push: { comments: data },
+      },
+      {
+        new: true,
+      }
+    );
+
+    const notification = {
+      userId: req.body.userId,
+      condentId: req.body.postId,
+      message: 'Commented your post : ' + req.body.comment,
+      timeStamp: req.body.timeStamp,
+      time: req.body.date,
+    };
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.postedUserId,
+      },
+      {
+        $push: { notifications: notification },
+      }
+    );
+    res.status(200).json({ commentAdded: true });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const profile = async (req, res) => {
+  try {
+    const userData = await schema.user_data.findById(req.query.userId);
+    const post = await schema.Post_data.find({
+      userId: req.query.userId,
+    });
+    res.status(200).json({ userData, post });
+  } catch (error) {
+    console.log('errorMessage', error.message);
+  }
+};
+
+const addProfilePic = (req, res) => {
+  try {
+    const data = req.query;
+    const storage = multer.diskStorage({
+      destination: path.join(__dirname, '../../public/images', 'profileImages'),
+      filename: (req, file, cb) => {
+        cb(null, Date.now() + '-' + data.userId + '.png');
+      },
+    });
+
+    const upload = multer({ storage: storage }).single('file');
+
+    upload(req, res, (err) => {
+      if (!req.file) {
+        console.log('no image');
+        res.json({ noImage: 'select image' });
+      } else {
+        const profileImage = req.file.filename;
+        schema.user_data
+          .findByIdAndUpdate(data.userId, {
+            profileImage,
+          })
+          .then((result) => {
+            res.status(200).json({ addProfileImage: result });
+          })
+          .catch((err) => {
+            res.json(err);
+          });
+      }
+    });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 module.exports = {
@@ -271,4 +399,7 @@ module.exports = {
   connect,
   likePost,
   unlikePost,
+  addComment,
+  profile,
+  addProfilePic,
 };

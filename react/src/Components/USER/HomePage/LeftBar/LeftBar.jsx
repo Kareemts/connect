@@ -1,7 +1,10 @@
 import { Avatar, Box, Card, Divider, Typography } from '@mui/material';
 import React from 'react';
 
+
 const LeftBar = () => {
+
+
   return (
     <Box flex="1" p="3" m={3} sx={{ display: { xs: 'none', sm: 'block' } }}>
       <Box position={'fixed'}>
@@ -30,7 +33,7 @@ const LeftBar = () => {
               alignContent: 'space-around',
             }}
           >
-            <Box m display={'flex'} justifyContent="center" alignItems="center">
+            <Box m display={'flex'} justifyContent="center" alignItems="center"   >
               <Avatar alt="Remy Sharp" src="" />
               <Typography m>Name</Typography>
             </Box>

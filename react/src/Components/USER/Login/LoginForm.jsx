@@ -35,7 +35,7 @@ const LoginForm = () => {
             'userData',
             JSON.stringify({ login: true, user: result.data.userDetails })
           );
-          setTimeout(()=>{navigate('/home')},5000);
+          navigate('/home');
         } else {
           setSignInErr(true);
         }
