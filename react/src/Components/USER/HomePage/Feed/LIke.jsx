@@ -16,19 +16,23 @@ const date =
 const LIke = ({ post, setLiked }) => {
   const [like, setLike] = useState(null);
   const [unlike, setUnlike] = useState(null);
+  const [changeLike, setChangeLike] = useState(false);
+
+   
 
   useEffect(() => {
     return () => {};
   }, [unlike, like]);
 
-  const likePost = (postId,postedUserId) => {
+  const likePost = (postId, postedUserId) => {
+    setChangeLike(true);
     axiosUrl
       .put('/likePost', {
         postId,
         userId,
         date,
         timeStamp,
-        postedUserId
+        postedUserId,
       })
       .then((result) => {
         setLike(result.data);
@@ -42,6 +46,7 @@ const LIke = ({ post, setLiked }) => {
   //for unlikeing post
 
   const unlikePost = (postId, postedUserId) => {
+    setChangeLike(false);
     axiosUrl
       .put('/unlikePost', {
         postId,
@@ -59,7 +64,7 @@ const LIke = ({ post, setLiked }) => {
 
   return (
     <Box>
-      {post.likes.includes(userId) ? (
+      {post.likes.includes(userId) || changeLike ? (
         <Box
           m
           component={'span'}

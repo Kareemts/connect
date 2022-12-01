@@ -67,7 +67,15 @@ const LoginForm = () => {
             alignItems: 'center',
           }}
         >
-          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+          <Box >
+          {/* <lottie-player
+                src="https://assets6.lottiefiles.com/packages/lf20_osdxlbqq.json"
+                background="transparent"
+                speed="1"
+                style={{ width: '70px', height: '70px' }}
+                loop
+                autoplay
+              ></lottie-player> */}
             <img
               style={{ width: '70px' }}
               src="../../../../images/LargePng.png"

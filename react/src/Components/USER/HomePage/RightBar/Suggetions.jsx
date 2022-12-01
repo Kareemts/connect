@@ -1,8 +1,13 @@
 import { Avatar, Box, Button, Typography } from '@mui/material';
 import React, { useState } from 'react';
 import { axiosUrl } from '../../../../axios/axiosInstance';
+import { useNavigate } from 'react-router-dom';
 
 const Suggetions = ({ user }) => {
+
+
+  const navigate = useNavigate();
+
   const [connection, setConnection] = useState(false);
 
   const timeStamp = new Date();
@@ -23,11 +28,21 @@ const Suggetions = ({ user }) => {
         timeStamp,
       })
       .then((result) => {
-        console.log(result);
         setConnection(true);
       })
       .catch((err) => {});
   };
+
+  const userName = user.firstName + '_' + user.lastName;
+  const name = userName.replaceAll(' ', '_');
+  
+  const showConnectionProfile = () => {
+    const connectionId = user._id;
+    navigate(`/user/${name}`, {
+      state: { connectionId },
+    });
+  };
+
   return (
     <Box
       m
@@ -44,8 +59,18 @@ const Suggetions = ({ user }) => {
         justifyContent="space-between"
         alignItems="center"
       >
-        <Box display={'flex'} justifyContent="center" alignItems="center">
-          <Avatar alt="Remy Sharp" src="" />
+        <Box
+          display={'flex'}
+          justifyContent="center"
+          alignItems="center"
+          sx={{ cursor: 'pointer' }}
+          component={'div'}
+          onClick={() => showConnectionProfile()}
+        >
+          <Avatar
+            alt={user.firstName}
+            src={`/images/profileImages/${user.profileImage}`}
+          />
           <Typography m>{user.firstName + ' ' + user.lastName}</Typography>
         </Box>
         {connection ? (

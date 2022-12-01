@@ -3,6 +3,7 @@ const bcrypt = require('bcrypt');
 const multer = require('multer');
 const path = require('path');
 const authentication = require('../../authentication/jwt/jwtAuthentication');
+const objectId = require('mongodb').ObjectId;
 const client = require('twilio')(
   process.env.ACCOUNT_SID,
   process.env.AUTH_TOKEN,
@@ -39,11 +40,11 @@ const signUp = async (req, res) => {
           res.json({ OtpVerify: true, data: req.body });
         })
         .catch((err) => {
-          console.log('', err.message);
+          res.status(500).json({ error: true });
         });
     }
   } catch (error) {
-    console.log('', error.message);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -71,7 +72,7 @@ const otpVarification = (req, res) => {
       }
     })
     .catch((err) => {
-      console.log(err);
+      res.status(500).json({ error: true });
     });
 };
 
@@ -102,7 +103,7 @@ const signIN = async (req, res) => {
           }
         })
         .catch((err) => {
-          console.log('err', err.message);
+          res.status(500).json({ error: true });
         });
     } else {
       res.json({ userLogin: false }); // invalid  userName or password
@@ -149,7 +150,7 @@ const imageUpload = (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -168,7 +169,7 @@ const getPostes = (req, res) => {
         res.json(result);
       });
   } catch (error) {
-    res.json(error.message);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -183,11 +184,13 @@ const suggestions = (req, res) => {
       })
       .catch((err) => {});
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
   }
 };
 
 const connect = async (req, res) => {
+  console.log(req.body);
+
   try {
     const connectionData = {
       followerId: req.body.userId,
@@ -195,7 +198,7 @@ const connect = async (req, res) => {
       timeStamp: req.body.timeStamp,
     };
 
-    await schema.user_data.updateOne(
+    const data = await schema.user_data.updateOne(
       {
         _id: req.body.connectedId,
       },
@@ -205,7 +208,7 @@ const connect = async (req, res) => {
     );
 
     connectionData.connctionId = req.body.connectedId;
-    
+
     await schema.user_data.updateOne(
       {
         _id: req.body.userId,
@@ -215,7 +218,7 @@ const connect = async (req, res) => {
       }
     );
 
-    connectionData.followerId = req.body.userId;
+    connectionData.userId = req.body.userId;
     connectionData.message = 'You have new follower';
     await schema.user_data.updateOne(
       {
@@ -225,15 +228,59 @@ const connect = async (req, res) => {
         $push: { notifications: connectionData },
       }
     );
-    res.status(200).json({ userConnecte: true });
+    res.status(200).json('userConnected');
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
+  }
+};
+
+const removeConnection = async (req, res) => {
+
+  // for remove data from user followers list
+
+  try {
+    const connectionData = {
+      followerId: req.body.userId,
+    };
+
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.connectedId,
+      },
+      {
+        $pull: { followers: connectionData },
+      }
+    );
+
+    // for remove data from user connections list
+
+    const data = await schema.user_data.updateOne(
+      {
+        _id: req.body.userId,
+      },
+      {
+        $pull: { connections: { connctionId: req.body.connectedId } },
+      }
+    );
+
+    // for remove data from user notification list
+
+    await schema.user_data.updateOne(
+      {
+        _id: req.body.connectedId,
+      },
+      {
+        $pull: { notifications: { userId: req.body.userId } },
+      }
+    );
+    res.status(200).json('userConnecttionRemove');
+  } catch (error) {
+    res.status(500).json({ error: true });
   }
 };
 
 const likePost = async (req, res) => {
   try {
-    console.log(req.body);
     const likedData = {
       likedUserId: req.body.userId,
       timeStamp: req.body.timeStamp,
@@ -262,7 +309,7 @@ const likePost = async (req, res) => {
 
     res.status(200).json(liked);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -297,7 +344,7 @@ const unlikePost = async (req, res) => {
     );
     res.status(200).json(uliked);
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -338,7 +385,7 @@ const addComment = async (req, res) => {
     );
     res.status(200).json({ commentAdded: true });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -350,7 +397,7 @@ const profile = async (req, res) => {
     });
     res.status(200).json({ userData, post });
   } catch (error) {
-    console.log('errorMessage', error.message);
+    res.status(500).json({ error: true });
   }
 };
 
@@ -385,8 +432,249 @@ const addProfilePic = (req, res) => {
       }
     });
   } catch (error) {
-    console.log(error);
+    res.status(500).json({ error: true });
   }
+};
+
+const notifications = async (req, res) => {
+  try {
+    const notifications_Likes = await schema.user_data.aggregate([
+      {
+        $match: { _id: objectId(req.query.userId) },
+      },
+      {
+        $unwind: '$notifications',
+      },
+      {
+        $project: {
+          userId: '$notifications.userId',
+          condentId: '$notifications.condentId',
+          message: '$notifications.message',
+          time: '$notifications.time',
+          timeStamp: '$notifications.timeStamp',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userData',
+        },
+      },
+      {
+        $project: {
+          userId: 1,
+          condentId: 1,
+          message: 1,
+          time: 1,
+          timeStamp: 1,
+          userData: 1,
+        },
+      },
+      {
+        $unwind: '$userData',
+      },
+      {
+        $project: {
+          userId: 1,
+          condentId: 1,
+          message: 1,
+          time: 1,
+          timeStamp: 1,
+          firstName: '$userData.firstName',
+          lastName: '$userData.lastName',
+          profileImage: '$userData.profileImage',
+        },
+      },
+      {
+        $lookup: {
+          from: 'posts',
+          localField: 'condentId',
+          foreignField: '_id',
+          as: 'postData',
+        },
+      },
+      {
+        $project: {
+          userId: 1,
+          condentId: 1,
+          message: 1,
+          time: 1,
+          timeStamp: 1,
+          firstName: 1,
+          lastName: 1,
+          profileImage: 1,
+          postData: 1,
+        },
+      },
+      {
+        $unwind: '$postData',
+      },
+      {
+        $project: {
+          userId: 1,
+          condentId: 1,
+          message: 1,
+          time: 1,
+          timeStamp: 1,
+          firstName: 1,
+          lastName: 1,
+          profileImage: 1,
+          postCaption: '$postData.postCaption',
+          imageName: '$postData.imageName',
+        },
+      },
+    ]);
+
+    const notifications_Followers = await schema.user_data.aggregate([
+      {
+        $match: { _id: objectId(req.query.userId) },
+      },
+
+      {
+        $unwind: {
+          path: '$notifications',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          userId: '$notifications.userId',
+          condentId: '$notifications.condentId',
+          message: '$notifications.message',
+          time: '$notifications.time',
+          timeStamp: '$notifications.timeStamp',
+        },
+      },
+      { $match: { message: 'You have new follower' } },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'followerData',
+        },
+      },
+      {
+        $unwind: {
+          path: '$followerData',
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          userId: 1,
+          condentId: 1,
+          message: 1,
+          time: 1,
+          timeStamp: 1,
+          firstName: '$followerData.firstName',
+          lastName: '$followerData.lastName',
+          profileImage: '$followerData.profileImage',
+        },
+      },
+    ]);
+
+    const noti = [...notifications_Followers, ...notifications_Likes];
+    res.status(200).json(noti);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const getConnections = async (req, res) => {
+  try {
+    const connections = await schema.user_data.aggregate([
+      {
+        $match: { _id: objectId(req.query.userId) },
+      },
+      {
+        $unwind: '$connections',
+      },
+      {
+        $project: {
+          connctionId: '$connections.connctionId',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'connctionId',
+          foreignField: '_id',
+          as: 'connectionData',
+        },
+      },
+      {
+        $unwind: '$connectionData',
+      },
+      {
+        $project: {
+          connctionId: 1,
+          firstName: '$connectionData.firstName',
+          lastName: '$connectionData.lastName',
+          profileImage: '$connectionData.profileImage',
+        },
+      },
+    ]);
+
+    res.status(200).json(connections);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const getFollowers = async (req, res) => {
+  try {
+    const followers = await schema.user_data.aggregate([
+      {
+        $match: { _id: objectId(req.query.userId) },
+      },
+      {
+        $unwind: '$followers',
+      },
+      {
+        $project: {
+          connctionId: '$followers.followerId',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'connctionId',
+          foreignField: '_id',
+          as: 'followerData',
+        },
+      },
+      {
+        $unwind: '$followerData',
+      },
+      {
+        $project: {
+          connctionId: 1,
+          firstName: '$followerData.firstName',
+          lastName: '$followerData.lastName',
+          profileImage: '$followerData.profileImage',
+        },
+      },
+    ]);
+    res.status(200).json(followers);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const connectedProfile = async (req, res) => {
+  const connectionId = req.query.connectionId.connectionId;
+
+  const connectedProfile = await schema.user_data.findOne({
+    _id: connectionId,
+  });
+
+  const connectedUserPosts = await schema.Post_data.find({
+    userId: connectionId,
+  });
+  res.status(200).json({ connectedProfile, connectedUserPosts });
 };
 
 module.exports = {
@@ -402,4 +690,9 @@ module.exports = {
   addComment,
   profile,
   addProfilePic,
+  notifications,
+  getConnections,
+  getFollowers,
+  connectedProfile,
+  removeConnection,
 };

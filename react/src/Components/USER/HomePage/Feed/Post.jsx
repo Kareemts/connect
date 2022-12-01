@@ -5,9 +5,30 @@ import LIke from './LIke';
 import Comment from './Comment';
 import { useState } from 'react';
 import CommentIcon from '@mui/icons-material/Comment';
+import { useNavigate } from 'react-router-dom';
 
-const Post = ({ post, setLiked,setFeed }) => {
+const Post = ({ post, setLiked, setFeed }) => {
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const userId = userData?.user.id;
+
+  const navigate = useNavigate();
+
   const [openComment, setOpenComment] = useState(false);
+
+  const userName = post.userId.firstName + '_' + post.userId.lastName;
+  const name = userName.replaceAll(' ', '_');
+
+  const showConnectionProfile = () => {
+    const connectionId = post.userId._id;
+
+    if (connectionId === userId) {
+      navigate('/Profile');
+    } else {
+      navigate(`/user/${name}`, {
+        state: { connectionId },
+      });
+    }
+  };
 
   return (
     <Box>
@@ -27,29 +48,19 @@ const Post = ({ post, setLiked,setFeed }) => {
             }}
           >
             <Box display={'flex'} alignItems="center">
-              {post?.userId.profileImage === '' ? (
-                <Avatar
-                  sx={{
-                    bgcolor: 'blue',
-                    margin: 2,
-                    width: { xs: '3rem' },
-                    height: { xs: '3rem' },
-                  }}
-                  aria-label="recipe"
-                ></Avatar>
-              ) : (
-                <CardMedia
-                  component="img"
-                  sx={{
-                    borderRadius: 100,
-                    margin: 1.5,
-                    width: { xs: '3rem' },
-                    height: { xs: '3rem' },
-                  }}
-                  src={`/images/profileImages/${post.userId.profileImage}`}
-                  alt="green iguana"
-                />
-              )}
+              <Avatar
+                src={`/images/profileImages/${post.userId.profileImage}`}
+                alt={post.userId.firstName}
+                sx={{
+                  margin: 2,
+                  width: { xs: '3rem' },
+                  height: { xs: '3rem' },
+                  cursor: 'pointer',
+                }}
+                onClick={() => showConnectionProfile()}
+                aria-label="recipe"
+              ></Avatar>
+
               <Box>
                 {post.userId.firstName + post.userId.lastName}
                 <Box>

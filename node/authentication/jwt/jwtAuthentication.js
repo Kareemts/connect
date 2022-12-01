@@ -8,10 +8,6 @@ module.exports = {
    * @returns jwt token
    */
   jwtAthentication: (data) => {
-    console.log('aaaaa',data.email);
-    data = {
-      id : data.id,
-    }
     console.log('aaaaa',data);
     return new Promise((resolve, reject) => {
       try {
@@ -25,3 +21,4 @@ module.exports = {
     });
   },
 };
+

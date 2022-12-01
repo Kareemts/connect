@@ -9,6 +9,8 @@ import ViewChat from './Pages/USER/ViewChat';
 import { Box } from '@mui/material';
 import PrivetRouter from './PrivetRouter';
 import Comment from './Components/USER/HomePage/Feed/Comment';
+import ViewConnectedProfile from './Pages/USER/ViewConnectedProfile';
+import ServerError from './Components/errorPages/ServerError';
 
 function App() {
   return (
@@ -17,12 +19,15 @@ function App() {
         <Routes>
           <Route path="/" element={<ViewLogin />} />
           <Route path="/Sign-Up" element={<ViewSignup />} />
+          <Route path="/error" element={<ServerError />} />
           <Route element={<PrivetRouter />}>
             <Route path="/home" element={<ViewHomePage />} />
             <Route path="/comments/:id" element={<Comment />} />
             <Route path="/Profile" element={<ViewProfile />} />
+            <Route path="/user/:name" element={<ViewConnectedProfile />} />
             <Route path="/Notification" element={<ViewNotification />} />
             <Route path="/Chat" element={<ViewChat />} />
+            <Route path="/Chat/:name" element={<ViewChat />} />
           </Route>
         </Routes>
       </BrowserRouter>

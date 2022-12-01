@@ -8,11 +8,17 @@ const {
   suggestions,
   otpVarification,
   connect,
+  removeConnection,
   likePost,
   unlikePost,
   addComment,
   profile,
   addProfilePic,
+  notifications,
+  getConnections,
+  getFollowers,
+  connectedProfile,
+  
 } = require('../controller/user/userController');
 const { verifyToken } = require('../middleware/middleware');
 
@@ -44,6 +50,10 @@ router.post('/otpVarification', otpVarification);
 
 router.post('/connect', connect);
 
+/**router for remove connected people */
+
+router.post('/removeConnection', removeConnection);
+
 /**router for connect people */
 
 router.put('/likePost', likePost);
@@ -63,5 +73,23 @@ router.get('/profile', profile);
 /**router for adding profilePic */
 
 router.post('/addProfilePic', addProfilePic);
+
+/**router for getting notifications */
+
+router.get('/notifications', notifications);
+
+/**router for geting connections */
+
+router.get('/getConnections', getConnections);
+
+/**router for geting followers */
+
+router.get('/getFollowers', getFollowers);
+
+/**router for geting connectedProfile */
+
+router.get('/connectedProfile', connectedProfile);
+
+
 
 module.exports = router;

@@ -1,6 +1,7 @@
 import {
   Avatar,
   Badge,
+  Button,
   Container,
   Divider,
   InputBase,
@@ -91,23 +92,34 @@ const Chat = () => {
             }}
             borderRadius={5}
           >
-            <Box p flex={2} borderRadius={2}>
-              <Box
-                sx={{ display: { xs: 'none', sm: 'block' } }}
-                display={'flex'}
-                justifyContent="center"
-                p
-                flex={2}
-              >
-                <Typography fontWeight={'bold'}>Name</Typography>
-              </Box>
-              <Divider sx={{ display: { xs: 'none', sm: 'block' } }} />
+            <Box
+              display={'flex'}
+              justifyContent="start"
+              alignItems="center"
+              p
+              flex={2}
+            >
+              <Avatar />
+              <Typography m fontWeight={'bold'}>
+                Name
+              </Typography>
             </Box>
-            <Box mt={47}>
-              <Divider />
-              <ChatBox>
-                <InputBase placeholder="Type a message..." />
-              </ChatBox>
+            <Divider sx={{ display: { xs: 'none', sm: 'block' } }} />
+            <Box height={370}>
+              <Box>Chat</Box>
+            </Box>
+            <Divider />
+            <Box m display={'flex'}>
+              {' '}
+              <InputBase
+                variant="standard"
+                autoFocus
+                multiline
+                fullWidth
+                placeholder="Type Message here..."
+                size="small"
+              />
+              <Button>send</Button>
             </Box>
           </Box>
         </Box>

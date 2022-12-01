@@ -14,10 +14,14 @@ import { axiosUrl } from '../../../../axios/axiosInstance';
 import './style.css';
 
 const Comment = ({ openComment, setOpenComment, post, setFeed }) => {
+
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
+
   const userName = userData?.user.name;
+
   const profileImage = userData?.user.profileImage;
+
   const comments = post.comments.reverse();
   const timeStamp = new Date();
   const hours = timeStamp.getHours() % 12 || 12;
