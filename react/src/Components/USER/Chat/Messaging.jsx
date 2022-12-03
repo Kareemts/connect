@@ -4,6 +4,7 @@ import { Avatar, Button, Divider, InputBase, Typography } from '@mui/material';
 import { axiosUrl } from '../../../axios/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'timeago.js';
+import { io } from 'socket.io-client';
 import './chat.css';
 
 const Messaging = ({
@@ -15,17 +16,29 @@ const Messaging = ({
 }) => {
   const navigate = useNavigate();
   const scrollRef = useRef();
-
   const timeStamp = new Date();
   const hours = timeStamp.getHours() % 12 || 12;
   const date =
     hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
-
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
-
   const [sentmessage, setSentMessage] = useState('');
   const [getmessages, setGettMessages] = useState([]);
+  const [socketMsessage, setSocketMessage] = useState(null);
+
+  const socket = useRef();
+  useEffect(() => {
+    socket.current = io('ws://localhost:8080');
+    socket.current.on('getMessage', (data) => {
+      setSocketMessage(Math.random());
+      setRefresh(Math.random());
+    });
+  }, [setRefresh]);
+
+  useEffect(() => {
+    socket.current.emit('addUser', userId);
+    socket.current.on('getUsers', (users) => {});
+  }, [connectionId, userId]);
 
   useEffect(() => {
     axiosUrl
@@ -43,7 +56,7 @@ const Messaging = ({
         navigate('/error');
       });
     return () => {};
-  }, [refresh, userId, connectionId, navigate, setRefresh]);
+  }, [refresh, userId, connectionId, navigate, setRefresh, socketMsessage]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,6 +64,12 @@ const Messaging = ({
   }, [getmessages]);
 
   const sendMessage = () => {
+    socket.current.emit('sendMessage', {
+      senderId: userId,
+      receverId: connectionId,
+      message: sentmessage,
+    });
+
     axiosUrl
       .post('/sendMessage', {
         connectionId,
@@ -98,7 +117,12 @@ const Messaging = ({
       <Box height={370} sx={{ overflowY: 'scroll' }} className={'messaging'}>
         {getmessages?.map((message, index) => {
           return message.messagerId === userId ? (
-            <Box display={'flex'} alignItems={'center'} ref={scrollRef}>
+            <Box
+              key={index}
+              display={'flex'}
+              alignItems={'center'}
+              ref={scrollRef}
+            >
               <Avatar
                 src={`/images/profileImages/${UserData?.profieImage}`}
                 alt={chatingUser?.name}
@@ -111,7 +135,6 @@ const Messaging = ({
                 aria-label="recipe"
               ></Avatar>
               <Box
-                key={index}
                 m
                 p={1}
                 sx={{
@@ -137,7 +160,12 @@ const Messaging = ({
               </Box>
             </Box>
           ) : (
-            <Box display={'flex'} alignItems={'center'} ref={scrollRef}>
+            <Box
+              key={index}
+              display={'flex'}
+              alignItems={'center'}
+              ref={scrollRef}
+            >
               <Avatar
                 src={`/images/profileImages/${chatingUser?.profieImage}`}
                 alt={chatingUser?.name}
@@ -150,7 +178,6 @@ const Messaging = ({
                 aria-label="recipe"
               ></Avatar>
               <Box
-                key={index}
                 m
                 p={1}
                 sx={{

@@ -20,8 +20,6 @@ const Chat = () => {
   const [chats, setChats] = useState([]);
   const [refresh, setRefresh] = useState('');
 
-  console.log(refresh);
-
   useEffect(() => {
     if (connectionId === null) setChatingUser(null);
 
