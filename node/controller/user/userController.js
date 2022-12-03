@@ -235,7 +235,6 @@ const connect = async (req, res) => {
 };
 
 const removeConnection = async (req, res) => {
-
   // for remove data from user followers list
 
   try {
@@ -677,6 +676,132 @@ const connectedProfile = async (req, res) => {
   res.status(200).json({ connectedProfile, connectedUserPosts });
 };
 
+const getChatingUser = async (req, res) => {
+  let chatingData = null;
+  let UserData = null;
+  try {
+    const connectionId = req.query.connectionId?.connectionId;
+    if (req.query.connectionId != null) {
+      const getChatingUser = await schema.user_data.findOne({
+        _id: connectionId,
+      });
+
+      const getUser = await schema.user_data.findOne({
+        _id: req.query.userId,
+      });
+
+      chatingData = {
+        name: getChatingUser?.firstName + ' ' + getChatingUser?.lastName,
+        profieImage: getChatingUser?.profileImage,
+      };
+      UserData = {
+        name: getUser?.firstName + ' ' + getUser?.lastName,
+        profieImage: getUser?.profileImage,
+      };
+    }
+
+    const chats = await schema.Caht_data.find({
+      chatingId: req.query.userId,
+    });
+
+    let data = {
+      chatingData,
+      chats,
+      UserData,
+    };
+    res.status(200).json(data);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true });
+  }
+};
+
+const getConversationUserData = async (req, res) => {
+  try {
+    const user = req.query.chatingId;
+    const getConversationUserData = await schema.user_data.findOne({
+      _id: user,
+    });
+
+    chatingData = {
+      name:
+        getConversationUserData.firstName +
+        ' ' +
+        getConversationUserData.lastName,
+
+      profileImage: getConversationUserData.profileImage,
+    };
+
+    res.status(200).json(chatingData);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const sendMessage = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+
+    const connectionId = req.body.connectionId.connectionId;
+
+    const message = [
+      {
+        messagerId: req.body.userId,
+        message: req.body.sentmessage,
+        timestamp: req.body.timeStamp,
+        time: req.body.date,
+      },
+    ];
+
+    const chat = await schema.Caht_data.findOne({
+      $and: [{ chatingId: userId }, { chatingId: connectionId }],
+    });
+
+    if (chat) {
+      const chat = await schema.Caht_data.updateOne(
+        {
+          $and: [{ chatingId: userId }, { chatingId: connectionId }],
+        },
+        {
+          $push: { chat: message },
+        }
+      );
+      res.status(200).json(chat);
+    } else {
+      const data = {
+        chatingId: [userId, connectionId],
+        chat: message,
+      };
+
+      const chat = await schema.Caht_data(data).save();
+
+      res.status(200).json(chat);
+    }
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const getMessages = async (req, res) => {
+  try {
+    console.log(req.query);
+
+    const userId = req.query.userId;
+
+    const connectionId = req.query.connectionId?.connectionId;
+
+    const messages = await schema.Caht_data.findOne({
+      $and: [{ chatingId: userId }, { chatingId: connectionId }],
+    });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    console.log(error.message);
+
+    res.status(500).json({ error: true });
+  }
+};
+
 module.exports = {
   signUp,
   signIN,
@@ -695,4 +820,8 @@ module.exports = {
   getFollowers,
   connectedProfile,
   removeConnection,
+  getChatingUser,
+  sendMessage,
+  getConversationUserData,
+  getMessages,
 };

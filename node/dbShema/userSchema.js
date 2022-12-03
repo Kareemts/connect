@@ -82,19 +82,19 @@ const Post_data = mongoose.model(collection.POST_COLLECTION, Post_Schema);
 
 //chat
 
-const Chat_Schema = new mongoose.Schema(
-  {
-    userId: String,
-    connctionId: ObjectId,
-    chat: [
-      {
-        messagerId: ObjectId,
-        message: String,
-      },
-    ],
-  },
-  { timestamp: true }
-);
+const Chat_Schema = new mongoose.Schema({
+  chatingId: [ObjectId, ObjectId],
+  // userId: ObjectId,
+  // connctionId: ObjectId,
+  chat: [
+    {
+      messagerId: ObjectId,
+      message: String,
+      timestamp: Date,
+      time: String,
+    },
+  ],
+});
 const Caht_data = mongoose.model(collection.CHAT_COLLECTION, Chat_Schema);
 
 module.exports = { user_data, userSignIn_data, Post_data, Caht_data };

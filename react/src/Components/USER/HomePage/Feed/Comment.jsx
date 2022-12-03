@@ -14,7 +14,6 @@ import { axiosUrl } from '../../../../axios/axiosInstance';
 import './style.css';
 
 const Comment = ({ openComment, setOpenComment, post, setFeed }) => {
-
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
 

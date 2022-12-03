@@ -18,6 +18,10 @@ const {
   getConnections,
   getFollowers,
   connectedProfile,
+  getChatingUser,
+  sendMessage,
+  getConversationUserData,
+  getMessages,
   
 } = require('../controller/user/userController');
 const { verifyToken } = require('../middleware/middleware');
@@ -89,6 +93,24 @@ router.get('/getFollowers', getFollowers);
 /**router for geting connectedProfile */
 
 router.get('/connectedProfile', connectedProfile);
+
+/**router for geting chating user */
+
+router.get('/getChatingUser', getChatingUser);
+
+/**router for geting conversatin users details */
+
+router.get('/getConversationUserData', getConversationUserData);
+
+/**router for geting sending message */
+
+router.post('/sendMessage', sendMessage);
+
+/**router for geting all messages from the chat */
+
+router.get('/getMessages', getMessages);
+
+
 
 
 

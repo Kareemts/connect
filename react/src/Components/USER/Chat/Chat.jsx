@@ -1,17 +1,54 @@
-import {
-  Avatar,
-  Badge,
-  Button,
-  Container,
-  Divider,
-  InputBase,
-  Typography,
-} from '@mui/material';
+import { Container, Divider, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import React from 'react';
-import { ChatBox } from './StyledChat';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { axiosUrl } from '../../../axios/axiosInstance';
+import ChatingFriends from './ChatingFriends';
+import Messaging from './Messaging';
 
 const Chat = () => {
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const userId = userData?.user.id;
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const connectionId = location.state;
+
+  const [chatingUser, setChatingUser] = useState(null);
+  const [UserData, setUserData] = useState(null);
+  const [chatId, setChatId] = useState(null);
+  const [chats, setChats] = useState([]);
+  const [refresh, setRefresh] = useState('');
+
+  console.log(refresh);
+
+  useEffect(() => {
+    if (connectionId === null) setChatingUser(null);
+
+    axiosUrl
+      .get('/getChatingUser', {
+        params: {
+          connectionId,
+          userId,
+        },
+      })
+      .then((result) => {
+        if (result.data.error) navigate('/error');
+        setChats(result.data.chats);
+        if (result.data.chatingData === null) {
+          setChatingUser(null);
+        } else {
+          setChatingUser(result.data.chatingData);
+          setUserData(result.data.UserData);
+        }
+      })
+      .catch((err) => {
+        navigate('/error');
+      });
+
+    return () => {};
+  }, [refresh, connectionId, navigate, userId, chatId]);
+
   return (
     <Box
       sx={{
@@ -53,75 +90,68 @@ const Chat = () => {
             </Box>
             <Divider sx={{ display: { xs: 'none', sm: 'block' } }} />
             <Box p flex={2} borderRadius={2}>
-              <Box p display={'flex'} justifyContent="space-between">
-                <Box display={'flex'} alignItems="center">
-                  <Avatar />
-                  <Typography ml>Name</Typography>
-                </Box>
-              </Box>
-              <Box
-                p
-                display={'flex'}
-                justifyContent="space-between"
-                alignItems="center"
-              >
-                <Box display={'flex'} alignItems="center">
-                  <Avatar></Avatar>
-                  <Typography ml>Name</Typography>
-                </Box>
-                <Box display={'flex'} alignItems={'center'}>
-                  <Badge badgeContent={4} color="error"></Badge>
-                  <Typography
-                    ml={2}
-                    sx={{ fontSize: '1.5vh', color: '#8E8E8E' }}
-                  >
-                    1hr ago
-                  </Typography>
-                </Box>
-              </Box>
+              {chats?.map((chat, index) => {
+                return (
+                  <ChatingFriends
+                    key={index}
+                    chat={chat}
+                    setChatId={setChatId}
+                  />
+                );
+              })}
             </Box>
           </Box>
-          <Box
-            p
-            m
-            flex={3}
-            bgcolor={'white'}
-            sx={{
-              display: { xs: 'none', sm: 'block' },
-              boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
-            }}
-            borderRadius={5}
-          >
+          {chatingUser === null ? (
             <Box
-              display={'flex'}
-              justifyContent="start"
-              alignItems="center"
               p
-              flex={2}
+              m
+              flex={3}
+              bgcolor={'white'}
+              sx={{
+                display: { xs: 'none', sm: 'block' },
+                boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
+              }}
+              borderRadius={5}
             >
-              <Avatar />
-              <Typography m fontWeight={'bold'}>
-                Name
-              </Typography>
+              <Box
+                display={'flex'}
+                justifyContent="start"
+                alignItems="center"
+                p
+                flex={2}
+              ></Box>
+
+              <Box
+                height={370}
+                display={'flex'}
+                alignItems="center"
+                justifyContent="center"
+              >
+                <Box fontWeight={'bold'}>Select a user and start chating</Box>
+              </Box>
             </Box>
-            <Divider sx={{ display: { xs: 'none', sm: 'block' } }} />
-            <Box height={370}>
-              <Box>Chat</Box>
-            </Box>
-            <Divider />
-            <Box m display={'flex'}>
-              {' '}
-              <InputBase
-                variant="standard"
-                autoFocus
-                multiline
-                fullWidth
-                placeholder="Type Message here..."
-                size="small"
+          ) : (
+            <Box
+              p
+              m
+              flex={3}
+              bgcolor={'white'}
+              sx={{
+                display: { xs: 'none', sm: 'block' },
+                boxShadow: 'rgba(99, 99, 99, 0.2) 0px 2px 8px 0px',
+              }}
+              borderRadius={5}
+            >
+              <Messaging
+                flex={3}
+                chatingUser={chatingUser}
+                UserData={UserData}
+                connectionId={connectionId}
+                setRefresh={setRefresh}
+                refresh={refresh}
               />
-              <Button>send</Button>
             </Box>
-          </Box>
+          )}
         </Box>
       </Container>
     </Box>

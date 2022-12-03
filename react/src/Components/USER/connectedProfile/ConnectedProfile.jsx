@@ -66,7 +66,7 @@ const ConnectedProfile = () => {
       });
 
     return () => {};
-  }, [connectionId, connectedData, userId]);
+  }, [connectionId, connectedData, userId, navigate]);
 
   const createConnection = () => {
     setConnect(true);
@@ -104,7 +104,6 @@ const ConnectedProfile = () => {
 
   const message = () => {
     const connectionId = connectedProfile?._id;
-    alert(connectionId);
     navigate(`/chat/${name}`, {
       state: { connectionId },
     });
@@ -112,198 +111,202 @@ const ConnectedProfile = () => {
 
   return (
     <Box>
-      <Box
-        mt={10}
-        sx={{
-          marginLeft: { xs: '10px', sm: '100px' },
-          marginRight: { xs: '10px', sm: '100px' },
-        }}
-      >
+      {connectedProfile && (
         <Box
-          display={'flex'}
-          sx={{ justifyContent: 'center' }}
-          alignItems={'center'}
-          bgcolor={'white'}
-          borderRadius={2}
-          mb={2}
-          p={2}
+          mt={10}
+          sx={{
+            marginLeft: { xs: '10px', sm: '100px' },
+            marginRight: { xs: '10px', sm: '100px' },
+          }}
         >
           <Box
-            component={'div'}
             display={'flex'}
-            flexDirection={'column'}
-            justifyContent="center"
+            sx={{ justifyContent: 'center' }}
             alignItems={'center'}
-            sx={{ marginRight: { xs: '0rem', sm: '1rem', md: '6rem' } }}
+            bgcolor={'white'}
+            borderRadius={2}
+            mb={2}
+            p={2}
           >
-            <Avatar
-              src={`/images/profileImages/${connectedProfile?.profileImage}`}
-              sx={{
-                margin: 2,
-                width: { xs: '4rem', sm: '5rem', md: '10rem' },
-                height: { xs: '4rem', sm: '5rem', md: '10rem' },
-                fontSize: { xs: '4rem', sm: '5rem', md: '10rem' },
-              }}
-              aria-label="recipe"
-            ></Avatar>
-          </Box>
-
-          <Box m={1}>
-            <Box display={'flex'} alignItems={'center'}>
-              <Typography m sx={{ fontSize: { xs: '1rem', sm: '2rem' } }}>
-                {connectedProfile?.firstName + ' ' + connectedProfile?.lastName}
-              </Typography>
-            </Box>
             <Box
+              component={'div'}
               display={'flex'}
-              justifyContent="space-between"
+              flexDirection={'column'}
+              justifyContent="center"
               alignItems={'center'}
+              sx={{ marginRight: { xs: '0rem', sm: '1rem', md: '6rem' } }}
             >
-              <Box m>
-                <Typography
-                  sx={{
-                    fontSize: { xs: '1.5vh', sm: '3vh' },
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span style={{ fontWeight: 'bold' }}>
-                    <Typography fontWeight={900}>{Posts?.length}</Typography>
-                  </span>{' '}
-                  Post
-                </Typography>
-              </Box>
-              <Box m>
-                <Typography
-                  //   onClick={() => setFollowers(true)}
-                  sx={{
-                    fontSize: { xs: '1.5vh', sm: '3vh' },
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span style={{ fontWeight: 'bold' }}>
-                    <Typography fontWeight={900}>
-                      {' '}
-                      {connectedProfile?.followers.length}
-                    </Typography>
-                  </span>{' '}
-                  Followers
-                </Typography>
-              </Box>
-              <Box
-                m
-                //   onClick={() => setConnections(true)}
-              >
-                <Typography
-                  sx={{
-                    fontSize: { xs: '1.5vh', sm: '3vh' },
-                    cursor: 'pointer',
-                  }}
-                >
-                  <span style={{ fontWeight: 'bold' }}>
-                    <Typography fontWeight={900}>
-                      {connectedProfile?.connections.length}
-                    </Typography>
-                  </span>{' '}
-                  Connections
-                </Typography>
-              </Box>
+              <Avatar
+                src={`/images/profileImages/${connectedProfile?.profileImage}`}
+                sx={{
+                  margin: 2,
+                  width: { xs: '4rem', sm: '5rem', md: '10rem' },
+                  height: { xs: '4rem', sm: '5rem', md: '10rem' },
+                  fontSize: { xs: '4rem', sm: '5rem', md: '10rem' },
+                }}
+                aria-label="recipe"
+              ></Avatar>
             </Box>
-            {connect ? (
-              <Box>
-                <Button
-                  sx={{ color: 'black', borderColor: 'black', marginLeft: 1 }}
-                  size="small"
-                  variant="outlined"
-                  onClick={() => removeConnection()}
-                >
-                  Remove
-                </Button>
-                <Button
-                  sx={{ color: 'black', borderColor: 'black', marginLeft: 3 }}
-                  size="small"
-                  variant="outlined"
-                  onClick={() => message()}
-                >
-                  Message
-                </Button>
-              </Box>
-            ) : (
-              <Button
-                size="small"
-                variant="contained"
-                onClick={() => createConnection()}
-              >
-                Connect
-              </Button>
-            )}
-          </Box>
-        </Box>
 
-        <Box
-          bgcolor={'white'}
-          mt
-          borderRadius={2}
-          pl={2}
-          p={2}
-          sx={{ minHeight: { xs: 350 } }}
-        >
-          <Box>
-            {noPost ? (
-              <Box
-                m={10}
-                display={'flex'}
-                justifyContent={'center'}
-                sx={{ fontSize: { xs: '1rem', sm: '1.5rem', md: '3rem' } }}
-                fontWeight={'bolder'}
-              >
-                No Posts Availabile
+            <Box m={1}>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography m sx={{ fontSize: { xs: '1rem', sm: '2rem' } }}>
+                  {connectedProfile?.firstName +
+                    ' ' +
+                    connectedProfile?.lastName}
+                </Typography>
               </Box>
-            ) : (
-              ''
-            )}
-            <Box sx={{ flexGrow: 1 }}>
-              <Grid container>
-                {Posts.map((element, index) => {
-                  return (
-                    <Grid
-                      key={index}
-                      display={'flex'}
-                      justifyContent="center"
-                      xs={4}
-                    >
-                      <Card sx={{ maxWidth: 300, margin: '5px' }}>
-                        <CardActionArea>
-                          <CardMedia
-                            component="img"
-                            sx={{
-                              borderRadius: 1,
-                              width: {
-                                xs: '6rem',
-                                sm: '10rem',
-                                md: '15rem',
-                                lg: '20rem',
-                              },
-                              height: {
-                                xs: '6rem',
-                                sm: '10rem',
-                                md: '15rem',
-                                lg: '20rem',
-                              },
-                            }}
-                            src={`/images/potImages/${element.imageName}`}
-                            alt="green iguana"
-                            // onClick={() => openPost(element.imageName)}
-                          />
-                        </CardActionArea>
-                      </Card>
-                    </Grid>
-                  );
-                })}
-              </Grid>
+              <Box
+                display={'flex'}
+                justifyContent="space-between"
+                alignItems={'center'}
+              >
+                <Box m>
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '1.5vh', sm: '3vh' },
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span style={{ fontWeight: 'bold' }}>
+                      <Typography fontWeight={900}>{Posts?.length}</Typography>
+                    </span>{' '}
+                    Post
+                  </Typography>
+                </Box>
+                <Box m>
+                  <Typography
+                    //   onClick={() => setFollowers(true)}
+                    sx={{
+                      fontSize: { xs: '1.5vh', sm: '3vh' },
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span style={{ fontWeight: 'bold' }}>
+                      <Typography fontWeight={900}>
+                        {' '}
+                        {connectedProfile?.followers.length}
+                      </Typography>
+                    </span>{' '}
+                    Followers
+                  </Typography>
+                </Box>
+                <Box
+                  m
+                  //   onClick={() => setConnections(true)}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: { xs: '1.5vh', sm: '3vh' },
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span style={{ fontWeight: 'bold' }}>
+                      <Typography fontWeight={900}>
+                        {connectedProfile?.connections.length}
+                      </Typography>
+                    </span>{' '}
+                    Connections
+                  </Typography>
+                </Box>
+              </Box>
+              {connect ? (
+                <Box>
+                  <Button
+                    sx={{ color: 'black', borderColor: 'black', marginLeft: 1 }}
+                    size="small"
+                    variant="outlined"
+                    onClick={() => removeConnection()}
+                  >
+                    Remove
+                  </Button>
+                  <Button
+                    sx={{ color: 'black', borderColor: 'black', marginLeft: 3 }}
+                    size="small"
+                    variant="outlined"
+                    onClick={() => message()}
+                  >
+                    Message
+                  </Button>
+                </Box>
+              ) : (
+                <Button
+                  size="small"
+                  variant="contained"
+                  onClick={() => createConnection()}
+                >
+                  Connect
+                </Button>
+              )}
+            </Box>
+          </Box>
+
+          <Box
+            bgcolor={'white'}
+            mt
+            borderRadius={2}
+            pl={2}
+            p={2}
+            sx={{ minHeight: { xs: 350 } }}
+          >
+            <Box>
+              {noPost ? (
+                <Box
+                  m={10}
+                  display={'flex'}
+                  justifyContent={'center'}
+                  sx={{ fontSize: { xs: '1rem', sm: '1.5rem', md: '3rem' } }}
+                  fontWeight={'bolder'}
+                >
+                  No Posts Availabile
+                </Box>
+              ) : (
+                ''
+              )}
+              <Box sx={{ flexGrow: 1 }}>
+                <Grid container>
+                  {Posts.map((element, index) => {
+                    return (
+                      <Grid
+                        key={index}
+                        display={'flex'}
+                        justifyContent="center"
+                        xs={4}
+                      >
+                        <Card sx={{ maxWidth: 300, margin: '5px' }}>
+                          <CardActionArea>
+                            <CardMedia
+                              component="img"
+                              sx={{
+                                borderRadius: 1,
+                                width: {
+                                  xs: '6rem',
+                                  sm: '10rem',
+                                  md: '15rem',
+                                  lg: '20rem',
+                                },
+                                height: {
+                                  xs: '6rem',
+                                  sm: '10rem',
+                                  md: '15rem',
+                                  lg: '20rem',
+                                },
+                              }}
+                              src={`/images/potImages/${element.imageName}`}
+                              alt="green iguana"
+                              // onClick={() => openPost(element.imageName)}
+                            />
+                          </CardActionArea>
+                        </Card>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+              </Box>
             </Box>
           </Box>
         </Box>
-      </Box>
+      )}
     </Box>
   );
 };
