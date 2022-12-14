@@ -8,12 +8,24 @@ const ObjectId = Schema.ObjectId;
 const User_Schema = new mongoose.Schema({
   firstName: String,
   lastName: String,
+  bio: String,
   email: String,
   phone: String,
   password: String,
   time: String,
   timeStamp: Date,
   profileImage: String,
+  notification: Boolean,
+  messages: Boolean,
+  report: Boolean,
+  blockUser:Boolean,
+  reportUser: [
+    {
+      reprtedUserId: ObjectId,
+      reportMessage: String,
+      time: Date,
+    },
+  ],
   connections: [
     {
       connctionId: ObjectId,
@@ -59,16 +71,18 @@ const Post_Schema = new mongoose.Schema({
   report: Boolean,
   userProfileImage: String,
   userId: { type: ObjectId, ref: 'users' },
+  report: Boolean,
+  blockPost:Boolean,
   reportPost: [
     {
-      userId: String,
-      comment: String,
-      reportComment: String,
+      userId: ObjectId,
+      reportMessage: String,
+      time: Date,
     },
   ],
   comments: [
     {
-      commentedUserId: String,
+      commentedUserId: ObjectId,
       comment: String,
       time: String,
       timeStamp: Date,
@@ -84,8 +98,7 @@ const Post_data = mongoose.model(collection.POST_COLLECTION, Post_Schema);
 
 const Chat_Schema = new mongoose.Schema({
   chatingId: [ObjectId, ObjectId],
-  // userId: ObjectId,
-  // connctionId: ObjectId,
+  messages: Boolean,
   chat: [
     {
       messagerId: ObjectId,

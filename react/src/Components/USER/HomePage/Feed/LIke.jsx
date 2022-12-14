@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Box } from '@mui/system';
 import { axiosUrl } from '../../../../axios/axiosInstance';
 import FavoriteIcon from '@mui/icons-material/Favorite';
-
+import { socketServer } from '../../../../socketIo/SocketIo';
 //taking userId from browserStorage
 const userData = JSON.parse(localStorage.getItem('userData'));
 const userId = userData?.user.id;
@@ -14,11 +14,10 @@ const date =
   hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
 
 const LIke = ({ post, setLiked }) => {
+  const socket = socketServer;
   const [like, setLike] = useState(null);
   const [unlike, setUnlike] = useState(null);
   const [changeLike, setChangeLike] = useState(false);
-
-   
 
   useEffect(() => {
     return () => {};
@@ -41,6 +40,10 @@ const LIke = ({ post, setLiked }) => {
       .catch((err) => {
         alert(err.message);
       });
+
+      socket.emit('sendNotification', {
+      receverId: postedUserId,
+    });
   };
 
   //for unlikeing post

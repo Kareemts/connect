@@ -60,7 +60,9 @@ const Profile = () => {
 
   const [viewPost, setViewPost] = useState(false);
 
-  const [imageName, setImageName] = useState(null);
+  const [postData, setPostData] = useState(null);
+
+  const [postComments, setPostComments] = useState([]);
 
   // state for image upload
   const [postImages, setPostImages] = useState({ file: [] });
@@ -83,7 +85,7 @@ const Profile = () => {
   //state for user profie details
   const [noPost, setNopost] = useState(false);
 
-  // const [loading, setLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
 
   // function for choose image
   const preview = (e) => {
@@ -104,7 +106,7 @@ const Profile = () => {
     const data = new FormData();
     console.log('', postImages);
     data.append('file', postImages.file);
-    axios
+    axiosUrl
       .post('/uploadPost', data, {
         params: {
           postCaption,
@@ -129,16 +131,12 @@ const Profile = () => {
       });
   };
 
-  const openPost = (image) => {
-    setImageName(image);
+  const openPost = (post) => {
+    setPostData(post);
     setViewPost(true);
   };
 
   useEffect(() => {
-    // if (Posts.length === 0) {
-    //   setLoading(true);
-    // }
-
     axiosUrl
       .get('/profile', {
         params: {
@@ -147,17 +145,32 @@ const Profile = () => {
       })
       .then((result) => {
         setProfileData(result.data.userData);
-        if (result.data.post >= 0) {
+        if (result.data.post <= 0) {
           setNopost(true);
         }
+        if (result.data.post.length > 0) {
+          setNopost(false);
+        }
         setPosts(result.data.post.reverse());
-        // setLoading(false);
       })
       .catch((err) => {
         alert(err.message);
       });
     return () => {};
-  }, [openProfilePic, post, userId]);
+  }, [openProfilePic, post, userId, refresh]);
+
+  const getPostComment = (postId) => {
+    axiosUrl
+      .get('/getPostComments', {
+        params: {
+          postId,
+        },
+      })
+      .then((result) => {
+        setPostComments(result.data.reverse());
+      })
+      .catch((err) => {});
+  };
 
   return (
     <Box>
@@ -220,7 +233,7 @@ const Profile = () => {
 
             <Box m={1}>
               <Box display={'flex'} alignItems={'center'}>
-                <Typography m sx={{ fontSize: { xs: '1rem', sm: '2rem' } }}>
+                <Typography sx={{ fontSize: { xs: '1rem', sm: '2rem' } }}>
                   {profileData?.firstName + ' ' + profileData?.lastName}
                 </Typography>
                 <SettingsIcon
@@ -228,12 +241,17 @@ const Profile = () => {
                   onClick={() => setSettings(true)}
                 />
               </Box>
+              <Box display={'flex'} alignItems={'center'}>
+                <Typography sx={{ fontSize: { xs: '.7rem', sm: '1rem' } }}>
+                  {profileData?.bio}
+                </Typography>
+              </Box>
               <Box
                 display={'flex'}
                 justifyContent="space-between"
                 alignItems={'center'}
               >
-                <Box m>
+                <Box>
                   <Typography
                     sx={{
                       fontSize: { xs: '1.5vh', sm: '3vh' },
@@ -324,7 +342,7 @@ const Profile = () => {
               )}
               <Box sx={{ flexGrow: 1 }}>
                 <Grid container>
-                  {Posts.map((element, index) => {
+                  {Posts.map((post, index) => {
                     return (
                       <Grid
                         key={index}
@@ -351,9 +369,12 @@ const Profile = () => {
                                   lg: '20rem',
                                 },
                               }}
-                              src={`/images/potImages/${element.imageName}`}
+                              src={`/images/potImages/${post.imageName}`}
                               alt="green iguana"
-                              onClick={() => openPost(element.imageName)}
+                              onClick={() => {
+                                getPostComment(post._id);
+                                openPost(post);
+                              }}
                             />
                           </CardActionArea>
                         </Card>
@@ -480,7 +501,10 @@ const Profile = () => {
           <ViewPost
             viewPost={viewPost}
             setViewPost={setViewPost}
-            imageName={imageName}
+            postData={postData}
+            postComments={postComments}
+            setPostComments={setPostComments}
+            setRefresh={setRefresh}
           />
           <Settings settings={settings} setSettings={setSettings} />
         </Box>

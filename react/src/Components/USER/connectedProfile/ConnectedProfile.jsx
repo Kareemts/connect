@@ -5,7 +5,13 @@ import {
   Card,
   CardActionArea,
   CardMedia,
+  Divider,
   Grid,
+  IconButton,
+  Menu,
+  MenuItem,
+  Modal,
+  TextField,
   Typography,
 } from '@mui/material';
 import React from 'react';
@@ -14,6 +20,15 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { axiosUrl } from '../../../axios/axiosInstance';
 import { useNavigate } from 'react-router-dom';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import styled from '@emotion/styled';
+
+const StyledModal = styled(Modal)({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  transform: 'translate(3)',
+});
 
 const ConnectedProfile = () => {
   const navigate = useNavigate();
@@ -28,6 +43,18 @@ const ConnectedProfile = () => {
 
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
+
+  const [postReporting, setPostReporting] = useState(false);
+  const [reportMessage, setReportMessage] = useState(null);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   const [connectedProfile, setConnectedProfile] = useState(null);
 
@@ -109,6 +136,26 @@ const ConnectedProfile = () => {
     });
   };
 
+  const report = () => {
+    if (reportMessage != null) {
+      axiosUrl
+        .post('/reprtUser', {
+          reprtedUserId:userId,
+          userId:connectionId,
+          reportMessage,
+          time: Date.now(),
+        })
+        .then((result) => {
+          setAnchorEl(null);
+          if (result.data.reported) setPostReporting(false);
+          // if(result.data.error){}
+        })
+        .catch((err) => {
+          alert(err.message);
+        });
+    }
+  };
+
   return (
     <Box>
       {connectedProfile && (
@@ -155,6 +202,18 @@ const ConnectedProfile = () => {
                     ' ' +
                     connectedProfile?.lastName}
                 </Typography>
+                <Box ml={3}>
+                  <IconButton aria-label="more" onClick={handleClick}>
+                    <MoreVertIcon />
+                  </IconButton>
+                </Box>
+                <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+                  <Box>
+                    <MenuItem onClick={() => setPostReporting(true)}>
+                      Report
+                    </MenuItem>
+                  </Box>
+                </Menu>
               </Box>
               <Box
                 display={'flex'}
@@ -307,6 +366,38 @@ const ConnectedProfile = () => {
           </Box>
         </Box>
       )}
+      <StyledModal open={postReporting} onClose={() => setPostReporting()}>
+        <Box
+          width={350}
+          height={300}
+          padding={3}
+          borderRadius={2}
+          bgcolor="white"
+          sx={{
+            backgroundColor: 'white',
+            border: 'none',
+            outline: 'none',
+          }}
+        >
+          <Box>Report this user</Box>
+          <Divider />
+          <Box>
+            <Box mt={3} mb={2} fontSize={12}>
+              Reason for reporting
+            </Box>
+            <TextField
+              fullWidth
+              id="outlined-multiline-static"
+              multiline
+              rows={5}
+              onChange={(e) => setReportMessage(e.target.value)}
+            />
+          </Box>
+          <Box mt display={'flex'} justifyContent={'flex-end'}>
+            <Button onClick={() => report()}>Report</Button>
+          </Box>
+        </Box>
+      </StyledModal>
     </Box>
   );
 };

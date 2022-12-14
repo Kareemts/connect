@@ -16,9 +16,22 @@ const Notification = () => {
 
   const [notifications, setNotifications] = useState([]);
 
-  const newdata = notifications.sort((a, b) => b.time - a.time);
 
   const [noNotification, setNoNotifications] = useState(false);
+
+ 
+
+  const sortNotifications = (a, b) => {
+    const dateA = new Date(a.timeStamp);
+    const dateB = new Date(b.timeStamp);
+    if (dateA < dateB) return 1;
+    else if (dateA > dateB) return -1;
+    return 0;
+  };
+
+  const data = notifications.sort(sortNotifications);
+
+  console.log(data);
 
   useEffect(() => {
     axiosUrl
@@ -89,7 +102,7 @@ const Notification = () => {
           <Typography> Friend Requtes (2)</Typography>
           <Button>See All</Button>
         </Box> */}
-        {newdata?.map((data, index) => {
+        {data?.map((data, index) => {
           return (
             <Box
               key={index}

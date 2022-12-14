@@ -52,7 +52,7 @@ const PorofilePic = ({ openProfilePic, setOpenProfilePic }) => {
         } else {
           setProfileImages('');
           setImage('');
-          setOpenProfilePic(false)
+          setOpenProfilePic(false);
         }
       });
   };

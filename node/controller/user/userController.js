@@ -48,6 +48,25 @@ const signUp = async (req, res) => {
   }
 };
 
+const resendOtp = (req, res) => {
+  try {
+    const mobile = req.body.phone;
+    //twilio.....................................
+    client.verify
+      .services(process.env.SERVICE_SID)
+      .verifications.create({
+        to: `+91${mobile}`,
+        channel: 'sms',
+      })
+      .then((result) => {
+        res.json({ OtpVerify: true, data: req.body });
+      })
+      .catch((err) => {
+        res.status(500).json({ error: true });
+      });
+  } catch (error) {}
+};
+
 const otpVarification = (req, res) => {
   const mobile = '+91' + req.body.props.data.phone;
   const otp = req.body.otp;
@@ -86,25 +105,29 @@ const signIN = async (req, res) => {
   try {
     let user = await schema.userSignIn_data.findOne({ email: req.body.email });
     if (user) {
-      bcrypt
-        .compare(req.body.password, user.password)
-        .then(async (result) => {
-          if (result) {
-            let userData = {};
-            userData.name = user.firstName + ' ' + user.lastName;
-            userData.id = user._id;
-            userData.email = user.email;
-            userData.phone = user.phone;
-            userData.profileImage = user.profileImage;
-            jwt = await authentication.jwtAthentication(userData);
-            res.json({ userLogin: true, userDetails: userData, token: jwt });
-          } else {
-            res.json({ userLogin: false }); //invalid password
-          }
-        })
-        .catch((err) => {
-          res.status(500).json({ error: true });
-        });
+      if (user.blockUser) {
+        res.json({ useBlocked: true });
+      } else {
+        bcrypt
+          .compare(req.body.password, user.password)
+          .then(async (result) => {
+            if (result) {
+              let userData = {};
+              userData.name = user.firstName + ' ' + user.lastName;
+              userData.id = user._id;
+              userData.email = user.email;
+              userData.phone = user.phone;
+              userData.profileImage = user.profileImage;
+              jwt = await authentication.jwtAthentication(userData);
+              res.json({ userLogin: true, userDetails: userData, token: jwt });
+            } else {
+              res.json({ userLogin: false }); //invalid password
+            }
+          })
+          .catch((err) => {
+            res.status(500).json({ error: true });
+          });
+      }
     } else {
       res.json({ userLogin: false }); // invalid  userName or password
     }
@@ -120,37 +143,64 @@ const signIN = async (req, res) => {
  * @param {success or fail message} res
  */
 
-const imageUpload = (req, res) => {
-  const data = req.query;
+const getUserData = async (req, res) => {
+  console.log(req.query);
+
   try {
-    const storage = multer.diskStorage({
-      destination: path.join(__dirname, '../../public/images', 'potImages'),
-      filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + data.userId + '.png');
-      },
+    const userData = await schema.user_data.findOne({
+      _id: req.query.userId,
     });
-
-    const upload = multer({ storage: storage }).single('file');
-
-    upload(req, res, (err) => {
-      if (!req.file) {
-        console.log('no image');
-        res.json({ noImage: 'select image' });
-      } else {
-        data.imageName = req.file.filename;
-        schema
-          .Post_data(data)
-          .save()
-          .then((result) => {
-            res.json({ posted: result });
-          })
-          .catch((err) => {
-            res.json(err);
-          });
-      }
-    });
+    res.status(200).json(userData);
   } catch (error) {
     res.status(500).json({ error: true });
+  }
+};
+
+const uploadPost = (req, res) => {
+  const data = req.query;
+  // try {
+  const storage = multer.diskStorage({
+    destination: path.join(__dirname, '../../public/images', 'potImages'),
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + '-' + data.userId + '.png');
+    },
+  });
+
+  const upload = multer({ storage: storage }).single('file');
+
+  upload(req, res, (err) => {
+    if (!req.file) {
+      console.log('no image');
+      res.json({ noImage: 'select image' });
+    } else {
+      data.imageName = req.file.filename;
+      schema
+        .Post_data(data)
+        .save()
+        .then((result) => {
+          res.json({ posted: result });
+        })
+        .catch((err) => {
+          console.log(err);
+          res.json(err);
+        });
+    }
+  });
+  // } catch (error) {
+  //   console.log(error);
+  //   res.status(500).json({ error: true });
+  // }
+};
+
+const deletePost = async (req, res) => {
+  console.log(req.query.postId);
+  try {
+    const postRemove = await schema.Post_data.findByIdAndDelete(
+      objectId(req.query.postId)
+    );
+    res.status(200).send({ deleted: true });
+  } catch (error) {
+    res.status(200).send({ error: true });
   }
 };
 
@@ -162,7 +212,9 @@ const imageUpload = (req, res) => {
 
 const getPostes = (req, res) => {
   try {
-    schema.Post_data.find()
+    schema.Post_data.find({
+      blockPost: { $ne: true },
+    })
       .populate({ path: 'userId' })
       .then((result) => {
         result = result.reverse();
@@ -174,8 +226,8 @@ const getPostes = (req, res) => {
 };
 
 const suggestions = (req, res) => {
-  const userId = req.query.useId;
-
+  const userId = req.query.userId;
+  console.log('aaaaaaaaaaaaaaaaaa', userId);
   try {
     schema.userSignIn_data
       .find({ _id: { $ne: userId } })
@@ -226,6 +278,9 @@ const connect = async (req, res) => {
       },
       {
         $push: { notifications: connectionData },
+        $set: {
+          notification: true,
+        },
       }
     );
     res.status(200).json('userConnected');
@@ -269,7 +324,14 @@ const removeConnection = async (req, res) => {
         _id: req.body.connectedId,
       },
       {
-        $pull: { notifications: { userId: req.body.userId } },
+        $pull: {
+          notifications: {
+            $and: [
+              { userId: req.body.userId },
+              { message: 'You have new follower' },
+            ],
+          },
+        },
       }
     );
     res.status(200).json('userConnecttionRemove');
@@ -294,17 +356,23 @@ const likePost = async (req, res) => {
         new: true,
       }
     );
-    likedData.message = 'Liked your post';
-    likedData.userId = req.body.userId;
-    likedData.condentId = req.body.postId;
-    await schema.user_data.updateOne(
-      {
-        _id: req.body.postedUserId,
-      },
-      {
-        $push: { notifications: likedData },
-      }
-    );
+    if (req.body.userId != req.body.postedUserId) {
+      likedData.message = 'Liked your post';
+      likedData.userId = req.body.userId;
+      likedData.condentId = req.body.postId;
+      await schema.user_data.updateMany(
+        {
+          _id: req.body.postedUserId,
+        },
+        {
+          $push: { notifications: likedData },
+
+          $set: {
+            notification: true,
+          },
+        }
+      );
+    }
 
     res.status(200).json(liked);
   } catch (error) {
@@ -338,7 +406,15 @@ const unlikePost = async (req, res) => {
         _id: req.body.postedUserId,
       },
       {
-        $pull: { notifications: { userId: req.body.userId } },
+        $pull: {
+          notifications: {
+            $and: [
+              { userId: req.body.userId },
+              { condentId: req.body.postId },
+              { message: 'Liked your post' },
+            ],
+          },
+        },
       }
     );
     res.status(200).json(uliked);
@@ -349,8 +425,9 @@ const unlikePost = async (req, res) => {
 
 const addComment = async (req, res) => {
   try {
+    console.log(req.body.userId);
     const data = {
-      CommentedUserId: req.body.userId,
+      commentedUserId: req.body.userId,
       comment: req.body.comment,
       time: req.body.date,
       timeStamp: req.body.timeStamp,
@@ -367,22 +444,71 @@ const addComment = async (req, res) => {
       }
     );
 
-    const notification = {
-      userId: req.body.userId,
-      condentId: req.body.postId,
-      message: 'Commented your post : ' + req.body.comment,
-      timeStamp: req.body.timeStamp,
-      time: req.body.date,
-    };
-    await schema.user_data.updateOne(
+    if (req.body.userId != req.body.postedUserId) {
+      const notification = {
+        userId: req.body.userId,
+        condentId: req.body.postId,
+        message: 'Commented your post : ' + req.body.comment,
+        timeStamp: req.body.timeStamp,
+        time: req.body.date,
+      };
+      await schema.user_data.updateOne(
+        {
+          _id: req.body.postedUserId,
+        },
+        {
+          $push: { notifications: notification },
+          $set: {
+            notification: true,
+          },
+        }
+      );
+    }
+
+    res.status(200).json({ commentAdded: true });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const getPostComments = async (req, res) => {
+  console.log(req.query.postId);
+
+  try {
+    const comments = await schema.Post_data.aggregate([
+      { $match: { _id: objectId(req.query.postId) } },
       {
-        _id: req.body.postedUserId,
+        $unwind: '$comments',
       },
       {
-        $push: { notifications: notification },
-      }
-    );
-    res.status(200).json({ commentAdded: true });
+        $project: {
+          userId: '$comments.commentedUserId',
+          timeStamp: '$comments.timeStamp',
+          comment: '$comments.comment',
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'userData',
+        },
+      },
+      {
+        $unwind: '$userData',
+      },
+      {
+        $project: {
+          comment: 1,
+          timeStamp: 1,
+          firstName: '$userData.firstName',
+          lastName: '$userData.lastName',
+          profileImage: '$userData.profileImage',
+        },
+      },
+    ]);
+    res.status(200).json(comments);
   } catch (error) {
     res.status(500).json({ error: true });
   }
@@ -395,6 +521,22 @@ const profile = async (req, res) => {
       userId: req.query.userId,
     });
     res.status(200).json({ userData, post });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const editProfile = async (req, res) => {
+  console.log(req.body);
+  try {
+    const data = await schema.user_data.findByIdAndUpdate(req.body.userId, {
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      bio: req.body.bio,
+      email: req.body.email,
+      phone: req.body.phone,
+    });
+    res.status(200).json({ update: true });
   } catch (error) {
     res.status(500).json({ error: true });
   }
@@ -764,6 +906,17 @@ const sendMessage = async (req, res) => {
         },
         {
           $push: { chat: message },
+          $set: {
+            messages: true,
+          },
+        }
+      );
+      await schema.user_data.findByIdAndUpdate(
+        req.body.connectionId.connectionId,
+        {
+          $set: {
+            messages: true,
+          },
         }
       );
       res.status(200).json(chat);
@@ -802,10 +955,142 @@ const getMessages = async (req, res) => {
   }
 };
 
+const serchUser = async (req, res) => {
+  const searchingData = req.query.searchingData.trim();
+  try {
+    if (!req.query.searchingData == '') {
+      const serchResult = await schema.user_data.find({
+        $or: [
+          { firstName: { $regex: searchingData, $options: 'i' } },
+          { lastName: { $regex: searchingData, $options: 'i' } },
+        ],
+      });
+      res.status(200).json(serchResult);
+    }
+  } catch (error) {
+    res.status(200).json({ error: true });
+  }
+};
+
+const reprtPost = async (req, res) => {
+  try {
+    const report = await schema.Post_data.findByIdAndUpdate(
+      req.body.postId,
+      {
+        $push: {
+          reportPost: [
+            {
+              userId: req.body.userId,
+              reportMessage: req.body.reportMessage,
+              time: req.body.time,
+            },
+          ],
+        },
+        $set: {
+          report: true,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    res.status(200).json({ reported: true });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const reprtUser = async (req, res) => {
+  try {
+    const report = await schema.user_data.findByIdAndUpdate(
+      req.body.userId.connectionId,
+      {
+        $push: {
+          reportUser: [
+            {
+              reprtedUserId: req.body.reprtedUserId,
+              reportMessage: req.body.reportMessage,
+              time: req.body.time,
+            },
+          ],
+        },
+        $set: {
+          report: true,
+        },
+      },
+      {
+        new: true,
+      }
+    );
+    res.status(200).json({ reported: true });
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: true });
+  }
+};
+
+const getNotification = async (req, res) => {
+  try {
+    let notification = await schema.user_data.findById(req.query.userId);
+    const data = {
+      notification: notification.notification,
+      messages: notification.messages,
+    };
+    res.status(200).json(data);
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const notificationStatus = async (req, res) => {
+  console.log(req.query);
+  try {
+    await schema.user_data.findByIdAndUpdate(req.query.userId, {
+      notification: false,
+    });
+    res.status(200).json({ notificaionStatus: false });
+  } catch (error) {}
+};
+
+const messageStatus = async (req, res) => {
+  console.log(req.query);
+  try {
+    await schema.user_data.findByIdAndUpdate(req.query.userId, {
+      messages: false,
+    });
+    res.status(200).json({ messageStatus: false });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
+const newMessageStatus = async (req, res) => {
+  console.log('aaaaaaaaaaaaaa', req.query);
+  try {
+    const chat = await schema.Caht_data.updateOne(
+      {
+        $and: [
+          { chatingId: req.query.userId },
+          { chatingId: req.query.connectionId },
+        ],
+      },
+      {
+        messages: false,
+      }
+    );
+    console.log(chat);
+    res.status(200).json({ messageStatus: false });
+  } catch (error) {
+    res.status(500).json({ error: true });
+  }
+};
+
 module.exports = {
   signUp,
+  resendOtp,
   signIN,
-  imageUpload,
+  getUserData,
+  uploadPost,
   getPostes,
   suggestions,
   otpVarification,
@@ -813,6 +1098,7 @@ module.exports = {
   likePost,
   unlikePost,
   addComment,
+  getPostComments,
   profile,
   addProfilePic,
   notifications,
@@ -824,4 +1110,13 @@ module.exports = {
   sendMessage,
   getConversationUserData,
   getMessages,
+  editProfile,
+  serchUser,
+  deletePost,
+  reprtPost,
+  reprtUser,
+  getNotification,
+  notificationStatus,
+  messageStatus,
+  newMessageStatus,
 };

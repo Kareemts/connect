@@ -24,12 +24,13 @@ const Messaging = ({
   const userId = userData?.user.id;
   const [sentmessage, setSentMessage] = useState('');
   const [getmessages, setGettMessages] = useState([]);
-  const [socketMsessage, setSocketMessage] = useState(null);
+  const [socketMsessage, setSocketMessage] = useState('');
 
   const socket = useRef();
   useEffect(() => {
     socket.current = io('ws://localhost:8080');
     socket.current.on('getMessage', (data) => {
+      alert('');
       setSocketMessage(Math.random());
       setRefresh(Math.random());
     });
@@ -38,7 +39,7 @@ const Messaging = ({
   useEffect(() => {
     socket.current.emit('addUser', userId);
     socket.current.on('getUsers', (users) => {});
-  }, [connectionId, userId]);
+  }, [connectionId, userId, refresh]);
 
   useEffect(() => {
     axiosUrl
@@ -49,19 +50,21 @@ const Messaging = ({
         },
       })
       .then((result) => {
-        if (result.data.error) navigate('/error');
-        setGettMessages(result.data.chat);
+        if (result?.data.error) navigate('/error');
+        setGettMessages(result?.data.chat);
       })
       .catch((err) => {
+        console.log(err);
         navigate('/error');
       });
+
     return () => {};
-  }, [refresh, userId, connectionId, navigate, setRefresh, socketMsessage]);
+  }, [socketMsessage, refresh, userId, connectionId, navigate]);
 
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: 'smooth' });
     return () => {};
-  }, [getmessages]);
+  }, [getmessages, socketMsessage]);
 
   const sendMessage = () => {
     socket.current.emit('sendMessage', {
@@ -155,7 +158,7 @@ const Messaging = ({
                   </Typography>
                 </Box>
                 <Typography sx={{ fontSize: 12, wordWrap: 'break-word' }}>
-                  {message.message}
+                  {message?.message}
                 </Typography>
               </Box>
             </Box>

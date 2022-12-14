@@ -1,7 +1,7 @@
 import styled from '@emotion/styled';
 import { Divider, Modal, Typography } from '@mui/material';
 import { Box } from '@mui/system';
-import React from 'react';
+import React, { useState } from 'react';
 import CloseIcon from '@mui/icons-material/Close';
 import EditProfile from './EditProfile';
 import ChangePassword from './ChangePassword';
@@ -18,6 +18,9 @@ const StyledModal = styled(Modal)({
 });
 
 const Settings = ({ settings, setSettings }) => {
+  const [editProfile, setEditProfile] = useState(true);
+  const [changePassword, setChangePassword] = useState(false);
+  const [logout, setLogout] = useState(false);
   return (
     <Box>
       <StyledModal open={settings} onClose={() => setSettings(false)}>
@@ -56,26 +59,45 @@ const Settings = ({ settings, setSettings }) => {
               m
               p={2}
               height={478}
-              borderRadius={2}
-              boxShadow={'0px 0px 37px -16px rgba(205, 202, 202, 0.8)'}
+              
             >
               <Box
                 display={'flex'}
                 justifyContent={'center'}
                 alignItems={'center'}
+                color={editProfile ? '#199FF7' : 'black'}
                 mt={5}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': { color: '#199FF7', transform: 's' },
+                }}
+                onClick={() => {
+                  setEditProfile(true);
+                  setChangePassword(false);
+                  setLogout(false);
+                }}
               >
                 <AccountCircleIcon />
                 <Typography m fontWeight={'bold'}>
-                  Profile
+                  Account
                 </Typography>
               </Box>
               <Box
                 display={'flex'}
                 justifyContent={'center'}
                 alignItems={'center'}
+                color={changePassword ? '#199FF7' : 'black'}
                 m
                 mt={5}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': { color: '#199FF7', transform: 's' },
+                }}
+                onClick={() => {
+                  setEditProfile(false);
+                  setChangePassword(true);
+                  setLogout(false);
+                }}
               >
                 <KeyIcon />
                 <Typography fontWeight={'bold'} m>
@@ -86,8 +108,18 @@ const Settings = ({ settings, setSettings }) => {
                 display={'flex'}
                 justifyContent={'center'}
                 alignItems={'center'}
+                color={logout ? '#199FF7' : 'black'}
                 m
                 mt={5}
+                sx={{
+                  cursor: 'pointer',
+                  '&:hover': { color: '#199FF7', transform: 's' },
+                }}
+                onClick={() => {
+                  setEditProfile(false);
+                  setChangePassword(false);
+                  setLogout(true);
+                }}
               >
                 <PowerSettingsNewIcon />
                 <Typography fontWeight={'bold'} m>
@@ -101,11 +133,11 @@ const Settings = ({ settings, setSettings }) => {
               m
               height={510}
               borderRadius={2}
-              boxShadow={'0px 0px 37px -16px rgba(205, 202, 202, 0.8)'}
+              boxShadow={'0 1px 2px -1px rgb(0 0 0 / 0.3)'}
             >
-              <EditProfile />
-              <ChangePassword />
-              <Logout />
+              {editProfile ? <EditProfile /> : ''}
+              {changePassword ? <ChangePassword /> : ''}
+              {logout ? <Logout setSettings={setSettings} /> : ''}
             </Box>
           </Box>
         </Box>

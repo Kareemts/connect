@@ -1,13 +1,12 @@
 import { styled, Box, Toolbar } from '@mui/material';
 
 export const Search = styled('div')(({ theme }) => ({
-  backgroundColor: 'white',
-  padding: '0 10px',
+  backgroundColor: '#FFFFFF',
+  padding: 1,
   border: 1,
-  borderStyle: 'solid',
-  borderColor: 'black',
   borderRadius: theme.shape.borderRadius,
-  width: '40%',
+  width: '100%',
+  display: 'flex',
 }));
 
 export const StyledToolbar = styled(Toolbar)({

@@ -10,19 +10,20 @@ import './Login.css';
 import Container from '@mui/material/Container';
 import { Alert, createTheme, ThemeProvider, Typography } from '@mui/material';
 import { useState } from 'react';
-import axios from 'axios';
+import { axiosUrl } from '../../../axios/axiosInstance';
 const theme = createTheme();
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPssword] = useState('');
   const [signInErr, setSignInErr] = useState(false);
+  const [userBlocked, setuserBlocked] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    axios
+    axiosUrl
       .post('/signIn', {
         email,
         password,
@@ -36,6 +37,8 @@ const LoginForm = () => {
             JSON.stringify({ login: true, user: result.data.userDetails })
           );
           navigate('/home');
+        } else if (result.data.useBlocked) {
+          setuserBlocked(true);
         } else {
           setSignInErr(true);
         }
@@ -43,6 +46,10 @@ const LoginForm = () => {
       .catch((err) => {
         alert(err.message);
       });
+    setTimeout(() => {
+      setuserBlocked(false);
+      setSignInErr(false);
+    }, 2000);
   };
 
   return (
@@ -67,8 +74,8 @@ const LoginForm = () => {
             alignItems: 'center',
           }}
         >
-          <Box >
-          {/* <lottie-player
+          <Box>
+            {/* <lottie-player
                 src="https://assets6.lottiefiles.com/packages/lf20_osdxlbqq.json"
                 background="transparent"
                 speed="1"
@@ -91,6 +98,21 @@ const LoginForm = () => {
             noValidate
             sx={{ mt: 1 }}
           >
+            {userBlocked ? (
+              <Alert
+                sx={{
+                  fontSize: 12,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                severity="warning"
+              >
+                <Box>Your account is blocked</Box>
+              </Alert>
+            ) : (
+              ''
+            )}
             {signInErr ? (
               <Alert
                 sx={{
@@ -137,7 +159,7 @@ const LoginForm = () => {
             >
               Sign In
             </Button>
-            <Grid direction="column" container>
+            {/* <Grid direction="column" container>
               <Button
                 type="submit"
                 variant="outlined"
@@ -160,7 +182,7 @@ const LoginForm = () => {
                   </Link>
                 </Grid>
               </Box>
-            </Grid>
+            </Grid> */}
           </Box>
         </Box>
         <Box component="main" display={'flex'} justifyContent="center" m mb={3}>

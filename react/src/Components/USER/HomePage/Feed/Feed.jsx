@@ -29,8 +29,8 @@ const Feed = () => {
         if (result.data.length <= 0) {
           setNoPost(true);
         } else if (result.data.userLogin === false) {
-          // localStorage.removeItem('userData');
-          // localStorage.removeItem('token');
+          localStorage.removeItem('userData');
+          localStorage.removeItem('token');
           navigate('/');
         } else {
           setGetPostes(result.data);
@@ -87,7 +87,12 @@ const Feed = () => {
         ''
       )}
       {getPostes?.map((post) => (
-        <Post key={post._id} post={post} setLiked={setLiked} setFeed={setFeed} />
+        <Post
+          key={post._id}
+          post={post}
+          setLiked={setLiked}
+          setFeed={setFeed}
+        />
       ))}
     </Box>
   );

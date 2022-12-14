@@ -11,11 +11,22 @@ import PrivetRouter from './PrivetRouter';
 import Comment from './Components/USER/HomePage/Feed/Comment';
 import ViewConnectedProfile from './Pages/USER/ViewConnectedProfile';
 import ServerError from './Components/errorPages/ServerError';
+import AdminLogin from './Components/ADMIN/adminLogin/AdminLogin';
+import Dashboard from './Components/ADMIN/dashboard/Dashboard';
+
 
 function App() {
   return (
     <Box>
       <BrowserRouter>
+        {/* admin */}
+        <Routes>
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route element={<PrivetRouter />}>
+            <Route path="/admin/dashboard" element={<Dashboard />} />
+          </Route>
+        </Routes>
+        {/* user */}
         <Routes>
           <Route path="/" element={<ViewLogin />} />
           <Route path="/Sign-Up" element={<ViewSignup />} />

@@ -299,7 +299,11 @@ const SignUp = () => {
           </Box>
         </Container>
       </ThemeProvider>
-      <OtpVerification props={signUpData} OtpVerify={OtpVerify} setOtpVerify={setOtpVerify} />
+      <OtpVerification
+        props={signUpData}
+        OtpVerify={OtpVerify}
+        setOtpVerify={setOtpVerify}
+      />
     </Box>
   );
 };

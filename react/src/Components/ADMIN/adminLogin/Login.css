@@ -1,0 +1,23 @@
+.logoCaption {
+  font-weight: bolder;
+}
+
+.login-Form {
+  border-radius: 2%;
+  margin: .5rem;
+  padding: 1px;
+}
+
+.signInWithGoogle {
+  align-content: center;
+}
+.signUp {
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  border-radius: 2%;
+  margin: 2rem;
+  padding: 5px;
+  box-shadow: 0px 0px 37px -16px rgba(205, 202, 202, 0.3);
+}

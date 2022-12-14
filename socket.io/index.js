@@ -4,42 +4,31 @@ const io = require('socket.io')(8080, {
   },
 });
 
-let users = [];
+const onlineUsers = [];
 
-const addUser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
-};
-
-const removeUser = (socketId) => {
-  users = users.filter((user) => user.socketId !== socketId);
-};
-
-// find the user for pushing message
-const getUser = (userId) => {
-  return users.find((user) => user.userId === userId.connectionId);
+const addOnlineUsers = (userId, socketId) => {
+  !onlineUsers.find((user) => user.userId === userId) &&
+    onlineUsers.push({ userId, socketId });
 };
 
 io.on('connection', (socket) => {
-  // take use id and socket from user
+  console.log('connected to socket server');
+
+  // take userid and socket from user
   socket.on('addUser', (userId) => {
-    addUser(userId, socket.id);
-    io.emit('getUsers', users);
+    addOnlineUsers(userId, socket.id);
+    io.emit('getUsers', onlineUsers);
+    console.log(onlineUsers);
   });
 
-  //send and get message
-  socket.on('sendMessage', ({ senderId, receverId, message }) => {
-    const user = getUser(receverId);
-    io.to(user?.socketId).emit('getMessage', {
-      senderId,
-      message,
-    });
-  });
+  socket.on('sendNotification', (data) => {
+    console.log(data);
+    console.log('onlineUsers8888888888888888', onlineUsers);
+    const user = onlineUsers.find((user) => user.userId === data.receverId);
 
-  //for disconnect
-  socket.on('disconnect', () => {
-    console.log('a user disconnected');
-    removeUser(socket.id);
-    io.emit('getUsers', users);
+    // console.log('user', user);
+    // if (user) {
+    //   io.emit('getNotification', data);
+    // }
   });
 });

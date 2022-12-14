@@ -1,7 +1,18 @@
-import { Avatar, Box, Card, Divider, Typography } from '@mui/material';
-import React from 'react';
+import { Box, Card, Divider, Typography } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { socketServer } from '../../../../socketIo/SocketIo';
+import Online from './Online';
+const socket = socketServer;
 
 const LeftBar = () => {
+  const [onlineUsers, setOnlineUsers] = useState([]);
+
+  useEffect(() => {
+    socket.on('getUsers', (users) => {
+      setOnlineUsers(users);
+      console.log(users);
+    });
+  }, []);
   return (
     <Box flex="1" p="3" m={3} sx={{ display: { xs: 'none', sm: 'block' } }}>
       <Box position={'fixed'}>
@@ -22,27 +33,9 @@ const LeftBar = () => {
             Online
           </Typography>
           <Divider />
-          <Box
-            m
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignContent: 'space-around',
-            }}
-          >
-            <Box m display={'flex'} justifyContent="center" alignItems="center">
-              <Avatar alt="Remy Sharp" src="" />
-              <Typography m>Name</Typography>
-            </Box>
-            <Box m display={'flex'} justifyContent="center" alignItems="center">
-              <Avatar alt="Remy Sharp" src="" />
-              <Typography m>Name</Typography>
-            </Box>
-            <Box m display={'flex'} justifyContent="center" alignItems="center">
-              <Avatar alt="Remy Sharp" src="" />
-              <Typography m>Name</Typography>
-            </Box>
-          </Box>
+          {onlineUsers.map((user, index) => {
+            return <Online key={index} user={user} />;
+          })}
         </Card>
       </Box>
     </Box>

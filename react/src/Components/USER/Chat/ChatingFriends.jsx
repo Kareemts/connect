@@ -1,4 +1,4 @@
-import { Avatar, Typography } from '@mui/material';
+import { Avatar, Badge, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import React, { useEffect } from 'react';
 import { format } from 'timeago.js';
@@ -9,7 +9,7 @@ import './chat.css';
 
 const ChatingFriends = ({ chat, setChatId }) => {
   const navigate = useNavigate();
-
+  console.log(chat);
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
 
@@ -40,9 +40,20 @@ const ChatingFriends = ({ chat, setChatId }) => {
   const message = () => {
     setChatId(chat._id);
     const name = conversationUser?.name.replaceAll(' ', '_');
-    navigate(`/chat/${name}`, {
-      state: { connectionId },
-    });
+
+    axiosUrl
+      .get('newMessageStatus', {
+        params: {
+          userId,
+          connectionId,
+        },
+      })
+      .then((result) => {
+        navigate(`/chat/${name}`, {
+          state: { connectionId },
+        });
+      })
+      .catch((err) => {});
   };
 
   const position = chat.chat.length - 1;
@@ -64,10 +75,24 @@ const ChatingFriends = ({ chat, setChatId }) => {
           <Box component={'div'} sx={{ cursor: 'pointer' }} onClick={message}>
             <Typography ml>{conversationUser?.name}</Typography>
           </Box>
-          <Box sx={{ overflowX: 'scroll', maxWidth: 100 }} className={'showMessage'} >
-            <Typography fontSize={12} ml>
-              {chat.chat[position].message}
-            </Typography>
+          <Box
+            sx={{ overflowX: 'scroll', maxWidth: 100 }}
+            className={'showMessage'}
+          >
+            {chat?.messages ? (
+              <Typography
+                fontSize={14}
+                color={'#199FF7'}
+                fontWeight={'bolder'}
+                ml
+              >
+                {chat.chat[position].message}
+              </Typography>
+            ) : (
+              <Typography fontSize={12} ml>
+                {chat.chat[position].message}
+              </Typography>
+            )}
           </Box>
         </Box>
       </Box>

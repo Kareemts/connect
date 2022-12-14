@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Box,
   Button,
   CardContent,
@@ -115,17 +116,17 @@ const Comment = ({ openComment, setOpenComment, post, setFeed }) => {
                 alignItems={'center'}
                 m
               >
-                <CardMedia
-                  component="img"
+                <Avatar
+                  src={`/images/profileImages/${comment.commentedUserImage}`}
+                  alt={post.userId.firstName}
                   sx={{
-                    borderRadius: 100,
                     margin: 1.5,
                     width: { xs: '2rem' },
                     height: { xs: '2rem' },
+                    cursor: 'pointer',
                   }}
-                  src={`/images/profileImages/${comment.commentedUserImage}`}
-                  alt="green iguana"
-                />
+                  aria-label="recipe"
+                ></Avatar>
                 <Box>
                   <Box
                     component={'div'}

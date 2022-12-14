@@ -18,7 +18,25 @@ const OtpVerification = ({ props, OtpVerify, setOtpVerify }) => {
   const [otpLength, setLength] = useState(false);
   const [otp, setOtp] = useState('');
   let navigate = useNavigate();
-  console.log(props);
+  const [timer, setTimer] = useState(59);
+
+
+  const id = React.useRef(null);
+  const clear = () => {
+    window.clearInterval(id.current);
+  };
+  React.useEffect(() => {
+    id.current = window.setInterval(() => {
+      setTimer((time) => time - 1);
+    }, 1000);
+    return () => clear();
+  }, [timer]);
+
+  React.useEffect(() => {
+    if (timer === 0) {
+      clear();
+    }
+  }, [timer]);
 
   const submit = () => {
     if (otp.length < 6 || otp === '') {
@@ -41,6 +59,20 @@ const OtpVerification = ({ props, OtpVerify, setOtpVerify }) => {
           alert(err.message);
         });
     }
+  };
+
+  const resendOtp = () => {
+    alert('')
+    axios
+      .post('/resendOtp', {
+        phone: props.data.phone,
+      })
+      .then((result) => {
+        setTimer(59);
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
   };
 
   return (
@@ -73,7 +105,7 @@ const OtpVerification = ({ props, OtpVerify, setOtpVerify }) => {
           </Box>
           <Box m>
             <Typography variant="h6" display={'flex'} justifyContent="center">
-              Enter your otp
+              Enter your OTP
             </Typography>
             <Divider />
           </Box>
@@ -82,11 +114,11 @@ const OtpVerification = ({ props, OtpVerify, setOtpVerify }) => {
             <TextField
               sx={{ margin: 5 }}
               id="standard-error-helper-text"
-              label="Enter otp"
+              label="Enter OTP"
               onChange={(e) => setOtp(e.target.value)}
               helperText={
                 otpInValid ? (
-                  <Box color={'red'}>incorrect otp</Box>
+                  <Box color={'red'}>incorrect OTP</Box>
                 ) : '' || otpLength ? (
                   <Box color={'red'}>OTP Must have 6 digits</Box>
                 ) : (
@@ -95,6 +127,18 @@ const OtpVerification = ({ props, OtpVerify, setOtpVerify }) => {
               }
               variant="standard"
             />
+            {timer === 0 ? (
+              <Box
+                component={'div'}
+                sx={{ cursor: 'pointer', color: 'blue', fontSize: 15 }}
+                onClick={() => resendOtp()}
+              >
+                Resnd OTP
+              </Box>
+            ) : (
+              <Box>0:{timer}</Box>
+            )}
+
             <Button sx={{ margin: 3 }} variant="contained" onClick={submit}>
               Submit
             </Button>

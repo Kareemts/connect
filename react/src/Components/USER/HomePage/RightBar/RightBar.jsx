@@ -12,11 +12,11 @@ import { useState } from 'react';
 import { axiosUrl } from '../../../../axios/axiosInstance';
 import Suggetions from './Suggetions';
 
-//taking userId from browserStorage
-const userData = JSON.parse(localStorage.getItem('userData'));
-const userId = userData?.user.id;
-
 const RightBar = () => {
+  //taking userId from browserStorage
+  const userData = JSON.parse(localStorage.getItem('userData'));
+  const userId = userData?.user.id;
+
   const [suggestions, setSuggestions] = useState(null);
 
   useEffect(() => {
@@ -49,14 +49,15 @@ const RightBar = () => {
         >
           <Box display={'flex'} justifyContent="space-between">
             <Typography fontWeight={300}>Suggestions For You</Typography>
-            <Button sx={{ borderRadius: '10px', fontSize: '10px' }}>
-              See All
-            </Button>
+            <Button sx={{ borderRadius: '10px', fontSize: '10px' }}></Button>
           </Box>
           <Divider />
           {suggestions ? (
             suggestions.map((user) => {
-              return <Suggetions key={user._id} user={user} />;
+              const friend = user.followers.map(
+                (follower) => follower.followerId === userId
+              );
+              return <Suggetions key={user._id} friend={friend} user={user} />;
             })
           ) : (
             <Stack spacing={1}>
