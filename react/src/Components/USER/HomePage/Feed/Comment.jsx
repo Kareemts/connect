@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   CardContent,
-  CardMedia,
   Collapse,
   Divider,
   TextField,
@@ -12,6 +11,7 @@ import {
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { axiosUrl } from '../../../../axios/axiosInstance';
+import { socketServer } from '../../../../socketIo/SocketIo';
 import './style.css';
 
 const Comment = ({ openComment, setOpenComment, post, setFeed }) => {
@@ -27,6 +27,7 @@ const Comment = ({ openComment, setOpenComment, post, setFeed }) => {
   const hours = timeStamp.getHours() % 12 || 12;
   const date =
     hours + ':' + timeStamp.getMinutes() + ', ' + timeStamp.toDateString();
+  const socket = socketServer;
 
   const postedUserId = post.userId._id;
 
@@ -40,6 +41,10 @@ const Comment = ({ openComment, setOpenComment, post, setFeed }) => {
     if (comment === '') {
       setCommntData(true);
     } else {
+      socket.emit('sendNotification', {
+        receverId: postedUserId,
+      });
+
       axiosUrl
         .put('/addComment', {
           comment,

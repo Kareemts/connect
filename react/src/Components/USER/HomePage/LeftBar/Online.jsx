@@ -19,12 +19,12 @@ const Online = ({ user }) => {
       })
       .then((result) => {
         setUserData(result.data);
-        console.log(userId);
         setFriend(
-          result.data?.followers.some((user) => user.followerId === userId)
+          result.data?.followers?.some((user) => user.followerId === userId)
         );
       })
       .catch((err) => {
+        console.log(err);
         alert(err);
       });
 

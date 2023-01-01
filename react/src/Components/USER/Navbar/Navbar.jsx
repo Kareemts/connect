@@ -19,6 +19,16 @@ const Navbar = () => {
   const [openSearch, setOpenSearch] = useState(false);
   const [notification, setNotification] = useState(false);
   const [messages, setMessages] = useState(false);
+  const [refreshing, setRefreshing] = useState(null);
+
+  useEffect(() => {
+    socket.on('getNotification', (data) => {
+      setRefreshing(data);
+    });
+    socket.on('getMessage', (data) => {
+      setRefreshing(data);
+    });
+  }, [socket]);
 
   useEffect(() => {
     axiosUrl
@@ -33,12 +43,8 @@ const Navbar = () => {
       })
       .catch((err) => {});
 
-    socket.on('getNotification', (data) => {
-      alert(data);
-    });
-
     return () => {};
-  }, []);
+  }, [refreshing, userId]);
 
   const getNotification = () => {
     axiosUrl

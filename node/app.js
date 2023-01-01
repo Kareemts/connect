@@ -21,7 +21,7 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static('public'));  
+app.use(express.static('public'));
 
 const connection = mongoose.connect(config.database, {
   useNewUrlParser: true,
@@ -35,6 +35,19 @@ if (connection) {
 
 app.use('/admin', adminRouter);
 app.use('/', usersRouter);
+
+// for deployment
+
+__dirname = path.resolve();
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../react/build')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../react', 'build', 'index.html'));
+  });
+}
+
+// for deployment
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

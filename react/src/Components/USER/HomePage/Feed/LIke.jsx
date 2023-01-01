@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import { Box } from '@mui/system';
 import { axiosUrl } from '../../../../axios/axiosInstance';
@@ -25,6 +25,9 @@ const LIke = ({ post, setLiked }) => {
 
   const likePost = (postId, postedUserId) => {
     setChangeLike(true);
+    socket.emit('sendNotification', {
+      postedUserId,
+    });
     axiosUrl
       .put('/likePost', {
         postId,
@@ -41,7 +44,7 @@ const LIke = ({ post, setLiked }) => {
         alert(err.message);
       });
 
-      socket.emit('sendNotification', {
+    socket.emit('sendNotification', {
       receverId: postedUserId,
     });
   };

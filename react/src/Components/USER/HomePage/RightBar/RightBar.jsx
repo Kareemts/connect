@@ -17,7 +17,9 @@ const RightBar = () => {
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
 
-  const [suggestions, setSuggestions] = useState(null);
+  const [suggestions, setSuggestions] = useState([]);
+
+
 
   useEffect(() => {
     axiosUrl
@@ -30,10 +32,11 @@ const RightBar = () => {
         setTimeout(() => setSuggestions(result.data), 1000);
       })
       .catch((err) => {
+        console.log(err);
         alert(err.message);
       });
-    return () => {};
-  }, []);
+
+  }, [userId]);
 
   return (
     <Box flex="2" p="3" m={5} sx={{ display: { xs: 'none', sm: 'block' } }}>
@@ -45,6 +48,7 @@ const RightBar = () => {
             marginTop: 3,
             borderRadius: 2,
             boxShadow: ' 0px 10px 37px -3px rgba(0,0,0,0.1)',
+            height: 300,
           }}
         >
           <Box display={'flex'} justifyContent="space-between">
@@ -53,15 +57,15 @@ const RightBar = () => {
           </Box>
           <Divider />
           {suggestions ? (
-            suggestions.map((user) => {
-              const friend = user.followers.map(
-                (follower) => follower.followerId === userId
+            suggestions?.map((user) => {
+              const friend = user?.followers?.map(
+                (follower) => follower?.followerId === userId
               );
               return <Suggetions key={user._id} friend={friend} user={user} />;
             })
           ) : (
             <Stack spacing={1}>
-              {/* For other variants, adjust the size with `width` and `height` */}
+              
               <Box pr pt display={'flex'} alignItems="center">
                 <Skeleton
                   sx={{ marginRight: 2 }}

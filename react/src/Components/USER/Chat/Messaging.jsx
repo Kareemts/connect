@@ -4,8 +4,8 @@ import { Avatar, Button, Divider, InputBase, Typography } from '@mui/material';
 import { axiosUrl } from '../../../axios/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'timeago.js';
-import { io } from 'socket.io-client';
 import './chat.css';
+import { socketServer } from '../../../socketIo/SocketIo';
 
 const Messaging = ({
   connectionId,
@@ -14,6 +14,7 @@ const Messaging = ({
   setRefresh,
   refresh,
 }) => {
+  const socket = socketServer;
   const navigate = useNavigate();
   const scrollRef = useRef();
   const timeStamp = new Date();
@@ -26,20 +27,12 @@ const Messaging = ({
   const [getmessages, setGettMessages] = useState([]);
   const [socketMsessage, setSocketMessage] = useState('');
 
-  const socket = useRef();
   useEffect(() => {
-    socket.current = io('ws://localhost:8080');
-    socket.current.on('getMessage', (data) => {
-      alert('');
-      setSocketMessage(Math.random());
-      setRefresh(Math.random());
+    socket.on('getMessage', (data) => {
+      setSocketMessage(data);
+      setRefresh(data)
     });
-  }, [setRefresh]);
-
-  useEffect(() => {
-    socket.current.emit('addUser', userId);
-    socket.current.on('getUsers', (users) => {});
-  }, [connectionId, userId, refresh]);
+  }, [ socket,setRefresh,refresh]);
 
   useEffect(() => {
     axiosUrl
@@ -50,8 +43,8 @@ const Messaging = ({
         },
       })
       .then((result) => {
-        if (result?.data.error) navigate('/error');
-        setGettMessages(result?.data.chat);
+        if (result?.data?.error) navigate('/error');
+        setGettMessages(result?.data?.chat);
       })
       .catch((err) => {
         console.log(err);
@@ -67,10 +60,9 @@ const Messaging = ({
   }, [getmessages, socketMsessage]);
 
   const sendMessage = () => {
-    socket.current.emit('sendMessage', {
-      senderId: userId,
-      receverId: connectionId,
-      message: sentmessage,
+    socket.emit('sendMessage', {
+      userId,
+      connectionId,
     });
 
     axiosUrl

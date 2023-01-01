@@ -1,4 +1,5 @@
 import {
+  Avatar,
   Button,
   Card,
   CardActionArea,
@@ -16,10 +17,7 @@ const Notification = () => {
 
   const [notifications, setNotifications] = useState([]);
 
-
   const [noNotification, setNoNotifications] = useState(false);
-
- 
 
   const sortNotifications = (a, b) => {
     const dateA = new Date(a.timeStamp);
@@ -29,9 +27,7 @@ const Notification = () => {
     return 0;
   };
 
-  const data = notifications.sort(sortNotifications);
-
-  console.log(data);
+  const data = notifications?.sort(sortNotifications);
 
   useEffect(() => {
     axiosUrl
@@ -87,21 +83,7 @@ const Notification = () => {
         ) : (
           ''
         )}
-        {/* <Box
-          bgcolor={'white'}
-          display={'flex'}
-          alignItems="center"
-          p
-          mb={2}
-          justifyContent="space-evenly"
-          sx={{
-            boxShadow: ' 0px 10px 37px -3px rgba(0,0,0,0.1)',
-            borderRadius: 2,
-          }}
-        >
-          <Typography> Friend Requtes (2)</Typography>
-          <Button>See All</Button>
-        </Box> */}
+
         {data?.map((data, index) => {
           return (
             <Box
@@ -115,15 +97,16 @@ const Notification = () => {
             >
               <Box display={'flex'} pl={2}>
                 <Box display={'flex'} alignItems="center">
-                  <CardMedia
-                    component="img"
+                  <Avatar
+                    src={`/images/profileImages/${data?.profileImage}`}
+                    alt={data?.firstName}
                     sx={{
-                      borderRadius: 100,
-                      width: { xs: '3rem' },
-                      height: { xs: '3rem' },
+                      margin: 1.5,
+                      width: { xs: '2rem' },
+                      height: { xs: '2rem' },
+                      cursor: 'pointer',
                     }}
-                    src={`/images/profileImages/${data.profileImage}`}
-                    alt="green iguana"
+                    aria-label="recipe"
                   />
                   <Box m>
                     <Typography sx={{ fontSize: { xs: 13, sm: 15 } }}>
@@ -146,7 +129,7 @@ const Notification = () => {
                   </Box>
                 </Box>
                 <Box m display={'flex'} alignItems="center">
-                  {data.message === 'You have new follower' ? (
+                  {data?.message === 'You have new follower' ? (
                     <Button
                       sx={{
                         borderRadius: '10px',

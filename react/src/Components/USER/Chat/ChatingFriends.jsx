@@ -9,7 +9,6 @@ import './chat.css';
 
 const ChatingFriends = ({ chat, setChatId }) => {
   const navigate = useNavigate();
-  console.log(chat);
   const userData = JSON.parse(localStorage.getItem('userData'));
   const userId = userData?.user.id;
 

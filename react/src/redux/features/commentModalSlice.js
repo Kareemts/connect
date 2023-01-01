@@ -4,7 +4,6 @@ const initialState = {
   commentModal: '',
 };
 
-console.log('modal', initialState);
 const commentModalSlice = createSlice({
   name: 'commnetModal',
   initialState,

@@ -22,7 +22,6 @@ import Connections from './Connections/Connections';
 import CollectionsIcon from '@mui/icons-material/Collections';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 // import CircularProgress from '@mui/material/CircularProgress';
-import axios from 'axios';
 import PorofilePic from './PorofilePic';
 import { axiosUrl } from '../../../axios/axiosInstance';
 import ViewPost from './ViewPost';

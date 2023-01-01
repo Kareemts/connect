@@ -17,7 +17,6 @@ const EditProfile = () => {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [updated, setUpdated] = useState(false);
-  console.log(userData);
   useEffect(() => {
     axiosUrl
       .get('/getUserData', {

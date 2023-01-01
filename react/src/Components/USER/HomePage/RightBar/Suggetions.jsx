@@ -28,7 +28,9 @@ const Suggetions = ({ user, friend }) => {
       .then((result) => {
         setConnection(true);
       })
-      .catch((err) => {});
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   const userName = user.firstName + '_' + user.lastName;
