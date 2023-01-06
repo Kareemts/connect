@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
-export const socketServer = io.connect('http://localhost:8080');
+export const socketServer = io.connect('http://localhost:8080' || 'https://connect-socket.onrender.com');
 
 const SocketIo = () => {
   const userData = JSON.parse(localStorage.getItem('userData'));
