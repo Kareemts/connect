@@ -1,6 +1,6 @@
 
 # CONNECT
-Connect plus is a social media platform 
+Connect is a social media platform 
 
 
 
@@ -26,8 +26,8 @@ Admin
 - Admin login
 - JWT autorisation
 - Block user
-- User management
-- Posts management
+- Block post
+
 
 ### Technologies used
 - Node.js 
@@ -41,6 +41,7 @@ Admin
 - JWT
 - Multer
 - Bcrypt - For password encryption
+- Twilio
 
 
 
