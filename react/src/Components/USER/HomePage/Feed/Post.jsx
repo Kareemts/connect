@@ -148,7 +148,7 @@ const Post = ({ post, setLiked, setFeed }) => {
               sx={{ borderRadius: 1 }}
               component="img"
               height="10%"
-              src={`images/potImages/${post.imageName}`}
+              src={`images/${post.imageName}`}
               alt="Paella dish"
             />
 

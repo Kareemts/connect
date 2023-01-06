@@ -6,12 +6,13 @@ var logger = require('morgan');
 var cors = require('cors');
 const config = require('./config/database');
 const mongoose = require('mongoose');
-
 var adminRouter = require('./routes/admin');
 var usersRouter = require('./routes/user');
 
 var app = express();
 app.use(cors());
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

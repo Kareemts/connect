@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+
 const {
   signUp,
   resendOtp,
@@ -63,15 +64,15 @@ router.post('/uploadPost', verifyToken, uploadPost);
 
 /* router for  deleting post */
 
-router.delete('/deletePost',verifyToken, deletePost);
+router.delete('/deletePost', verifyToken, deletePost);
 
 /* router for  getPost */
 
-router.get('/getPostes',verifyToken, getPostes);
+router.get('/getPostes', verifyToken, getPostes);
 
 /* router for getting suggestions in home page */
 
-router.get('/suggestions',verifyToken, suggestions);
+router.get('/suggestions', verifyToken, suggestions);
 
 /**router for connect people */
 
@@ -168,11 +169,5 @@ router.get('/messageStatus', verifyToken, messageStatus);
 /**router for change messageNotificationStatus status */
 
 router.get('/newMessageStatus', verifyToken, newMessageStatus);
-
-router.get('/hari', (req, res) => {
-  res.json({
-    name: 'poooda mayreee',
-  });
-});
 
 module.exports = router;
